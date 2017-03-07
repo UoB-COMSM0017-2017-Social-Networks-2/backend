@@ -28,13 +28,31 @@ def get_tweets_in_region(tweets, region):
 
 
 class StatusInterval:
-    def __init__(self, tweets):
+    def __init__(self, topic_data):
         # topic_data: topic -> StatusIntervalTopic
-        self.topic_data = dict()
+        self.topic_data = topic_data
+
+    @classmethod
+    def from_dict(cls, data):
+        topic_data = dict()
+        for topic in data['topics']:
+            topic_data[topic] = StatusIntervalTopic.from_dict(data['topics'][topic])
+        return StatusInterval(topic_data)
+
+    @classmethod
+    def from_tweets(cls, tweets):
+        topic_data = dict()
         topics = {tweet.topic for tweet in tweets}
         for topic in topics:
             topic_tweets = [tweet for tweet in tweets if tweet.topic == topic]
-            self.topic_data[topic] = StatusIntervalTopic(topic_tweets)
+            topic_data[topic] = StatusIntervalTopic(topic_tweets)
+        return StatusInterval(topic_data)
+
+    def get_dict(self):
+        result = dict()
+        for topic in self.topic_data:
+            result[topic] = self.topic_data[topic].get_dict()
+        return {"topics": result}
 
     def get_global_topic_details(self):
         result = []
@@ -59,13 +77,31 @@ class StatusInterval:
 
 
 class StatusIntervalTopic:
-    def __init__(self, tweets):
+    def __init__(self, location_data):
         # location_data: region id -> StatusIntervalTopicRegion
-        self.location_data = dict()
+        self.location_data = location_data
+
+    @classmethod
+    def from_tweets(cls, tweets):
+        location_data = dict()
         all_regions = regions.get_all_regions()
         for region in all_regions:
             region_tweets = get_tweets_in_region(tweets, region)
-            self.location_data[region.woeid] = StatusIntervalTopicRegion(region_tweets)
+            location_data[region.woeid] = StatusIntervalTopicRegion(region_tweets)
+        return StatusIntervalTopic(location_data)
+
+    @classmethod
+    def from_dict(cls, data):
+        location_data = dict()
+        for location in data:
+            location_data[location] = StatusIntervalTopicRegion.from_dict(data[location])
+        return StatusIntervalTopic(location_data)
+
+    def get_dict(self):
+        result = dict()
+        for location in self.location_data:
+            result[location] = self.location_data[location].get_dict()
+        return result
 
     def get_global_data(self):
         global_region = regions.get_global_region()
@@ -76,11 +112,35 @@ class StatusIntervalTopic:
 
 
 class StatusIntervalTopicRegion:
-    def __init__(self, tweets):
-        self.popularity = len(tweets)
-        self.nb_positive = sum([1 for tweet in tweets if tweet.positive_sentiment()])
-        self.nb_negative = sum([1 for tweet in tweets if tweet.negative_sentiment()])
-        self.nb_neutral = sum([1 for tweet in tweets if tweet.neutral_sentiment()])
+    def __init__(self, popularity, nb_positive, nb_negative, nb_neutral):
+        self.popularity = popularity
+        self.nb_positive = nb_positive
+        self.nb_negative = nb_negative
+        self.nb_neutral = nb_neutral
+
+    @classmethod
+    def from_tweets(cls, tweets):
+        popularity = len(tweets)
+        nb_positive = sum([1 for tweet in tweets if tweet.positive_sentiment()])
+        nb_negative = sum([1 for tweet in tweets if tweet.negative_sentiment()])
+        nb_neutral = sum([1 for tweet in tweets if tweet.neutral_sentiment()])
+        return StatusIntervalTopicRegion(popularity, nb_positive, nb_negative, nb_neutral)
+
+    @classmethod
+    def from_dict(cls, data):
+        popularity = data['popularity']
+        nb_positive = data['nb_positive']
+        nb_negative = data['nb_negative']
+        nb_neutral = data['nb_neutral']
+        return StatusIntervalTopicRegion(popularity, nb_positive, nb_negative, nb_neutral)
+
+    def get_dict(self):
+        return {
+            "popularity": self.popularity,
+            "nb_positive": self.nb_positive,
+            "nb_negative": self.nb_negative,
+            "nb_neutral": self.nb_neutral
+        }
 
     def get_popularity(self):
         return self.popularity
@@ -99,7 +159,25 @@ class StatusIntervalTopicRegion:
 class StatusAggregate:
     def __init__(self, intervals):
         # intervals: interval -> StatusInterval
-        self.intervals = intervals
+        self.intervals = dict()
+        for interval in intervals:
+            self.intervals[interval] = StatusInterval(interval)
+
+    @classmethod
+    def from_dict(cls, data):
+        intervals = dict()
+        for interval_data in data:
+            intervals[(interval_data["start"], interval_data["end"])] = StatusInterval.from_dict(interval_data)
+        return StatusAggregate(intervals)
+
+    def to_dict(self):
+        result = []
+        for interval in self.intervals:
+            interval_data = interval.get_dict()
+            interval_data["start"] = interval[0]
+            interval_data["end"] = interval[1]
+            result.append(interval_data)
+        return result
 
     def add_interval(self, interval, tweets):
         self.validate_interval(interval)
@@ -108,9 +186,6 @@ class StatusAggregate:
         tweets = get_tweets_between(tweets, interval[0], interval[1])
         self.intervals[interval] = StatusInterval(tweets)
         # TODO: process
-
-    def get_interval_data(self):
-        return None
 
     def get_long_intervals(self):
         pass
@@ -185,4 +260,4 @@ def load_disk_status():
 
 def write_disk_status(status):
     with open(STATUS_FILE, 'w') as f:
-        json.dump(status.get_interval_data(), f)
+        json.dump(status.to_dict(), f)
