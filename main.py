@@ -4,7 +4,7 @@ import logging
 
 from flask import Flask, jsonify, make_response
 
-import data
+from processing import data, regions
 
 app = Flask("SN2")
 app.config.from_pyfile('config.cfg')
@@ -45,18 +45,17 @@ def get_interval_topics(interval):
 
 
 @app.route('/topic/<string:topic_id>/evolution.csv')
+@app.route('/stream_chart/<string:topic_id>/evolution.csv')
 def get_topic_evolution(topic_id):
     """
     :param topic_id:
     :return: Evolution of global topic popularity and sentiment over time as CSV response.
     """
-    topic_evolution = data.get_topic_evolution(topic_id)
-    data_array = []
-    # TODO: convert to list
-    return output_csv_file("evolution.csv", data_array)
+    return get_topic_location_evolution(topic_id, regions.get_global_region().woeid)
 
 
 @app.route('/topic/<string:topic_id>/location/<string:location_id>/evolution.csv')
+@app.route('/stream_chart/<string:topic_id>/location/<string:location_id>/evolution.csv')
 def get_topic_location_evolution(topic_id, location_id):
     """
     :param topic_id:
@@ -64,20 +63,34 @@ def get_topic_location_evolution(topic_id, location_id):
     :return: Evolution of local topic popularity and sentiment over time as CSV response.
     """
     topic_evolution = data.get_topic_location_evolution(topic_id, location_id)
-    data_array = []
-    # TODO: convert to list
+    pos_lines = []
+    neg_lines = []
+    neut_lines = []
+    for interval in topic_evolution:
+        timestamp = (interval["interval_start"] +
+                     interval["interval_end"]) // 2
+        pos_lines.append(
+            ["POS", interval["sentiment_distribution"]["positive"], timestamp])
+        neut_lines.append(
+            ["NEUT", interval["sentiment_distribution"]["neutral"], timestamp])
+        neg_lines.append(
+            ["NEG", interval["sentiment_distribution"]["negative"], timestamp])
+    data_array = pos_lines + neut_lines + neg_lines
     return output_csv_file("evolution.csv", data_array)
 
 
 @app.route('/topics/interval/<string:interval>/data.csv')
+@app.route('/bubble_chart/<string:interval>/data.csv')
 def get_interval_topics_details(interval):
     """
     :param interval:
     :return: Popularity and overall sentiment of all topics in interval as a CSV response.
     """
     topics_details = data.get_interval_topics_details(interval)
-    data_array = []
-    # TODO: convert to list
+    data_array = [
+        (topic["topic"], topic["topic"], topic["nb_tweets"], topic["overall_sentiment"], topic["positive_ratio"])
+        for topic in topics_details
+        ]
     return output_csv_file("data.csv", data_array)
 
 
