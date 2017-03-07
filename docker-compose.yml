@@ -1,0 +1,9 @@
+version: '2'
+services:
+  api:
+    build: .
+    command: python -u main.py
+    ports:
+      - "13000:5000"
+    volumes:
+      - .:/code
