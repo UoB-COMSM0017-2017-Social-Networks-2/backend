@@ -1,7 +1,7 @@
 import datetime
 import json
 
-from processing import regions
+from processing import regions, get_short_term_start
 
 STATUS_FILE = "output/status.json"
 
@@ -185,17 +185,21 @@ class StatusAggregate:
             raise Exception("Interval {} already present in StatusAggregate".format(interval))
         tweets = get_tweets_between(tweets, interval[0], interval[1])
         self.intervals[interval] = StatusInterval(tweets)
-        # TODO: process
 
-    def get_long_intervals(self):
-        pass
+    def get_long_intervals_data(self):
+        short_start = get_short_term_start()
+        return [self.intervals[interval] for interval in self.intervals if interval[0] < short_start]
 
     def get_topics(self, interval):
         self.validate_interval(interval)
         return None
 
     def get_last_interval(self):
-        return None
+        last = None
+        for interval in self.intervals:
+            if last is None or interval > last:
+                last = interval
+        return last
 
     def get_topic_details_for_interval(self, interval):
         self.validate_interval(interval)
@@ -234,21 +238,30 @@ class StatusAggregate:
     def get_topic_interval_data_per_region(self, topic_id, interval):
         self.validate_topic(topic_id)
         self.validate_interval(interval)
+        # TODO: implement
         return None
 
     def get_topic_interval_location_data(self, topic_id, interval, location_id):
         self.validate_topic(topic_id)
         self.validate_interval(interval)
         self.validate_location(location_id)
+        # TODO: implement
         return None
 
     def validate_topic(self, topic_id):
-        return None
+        discussed = False
+        for interval in self.intervals.items():
+            if interval.discusses_topic(topic_id):
+                discussed = True
+        if not discussed:
+            raise Exception("Topic not discussed in any interval")
 
     def validate_interval(self, interval):
-        return None
+        if interval not in self.intervals:
+            raise Exception("Invalid interval: not present")
 
     def validate_location(self, location_id):
+        # TODO: implement
         return None
 
 

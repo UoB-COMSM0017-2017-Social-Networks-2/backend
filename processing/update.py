@@ -36,7 +36,7 @@ def process_new_tweets(new_tweets):
     short_term_start = get_short_term_start()
 
     disk_status = load_disk_status()
-    new_status = StatusAggregate(disk_status.get_long_intervals())
+    new_status = StatusAggregate(disk_status.get_long_intervals_data())
 
     short_intervals = get_short_intervals()
     for interval in short_intervals:
