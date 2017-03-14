@@ -1,6 +1,8 @@
 import calendar
 import datetime
 
+from processing import sentiment
+
 SHORT_PERIOD = datetime.timedelta(days=7)
 SHORT_INTERVAL_LENGTH = datetime.timedelta(hours=1)
 LONG_INTERVAL_LENGTH = datetime.timedelta(days=1)
@@ -54,13 +56,21 @@ class Tweet:
     def get_compound_sentiment(self):
         return self.sentiment["compound"]
 
+    def negative_sentiment(self):
+        return self.sentiment['neg'] > max(self.sentiment['neu'], self.sentiment['pos'])
+
+    def neutral_sentiment(self):
+        return self.sentiment['neu'] > max(self.sentiment['pos'], self.sentiment['neg'])
+
+    def positive_sentiment(self):
+        return self.sentiment['pos'] > max(self.sentiment['neg'], self.sentiment['neu'])
+
     @classmethod
     def load_raw_tweet(cls, tweet_obj):
         arr = dict()
         arr["text"] = tweet_obj[MINING_TEXT_KEY]
         arr["tweet_id"] = tweet_obj[MINING_ID_KEY]
-        # TODO: compute sentiment
-        arr["sentiment"] = None
+        arr["sentiment"] = sentiment.get_tweet_sentiment(tweet_obj)
         # TODO: compute woeid
         arr["woeid"] = None
         arr["timestamp"] = int(tweet_obj[MINING_TIMESTAMP_KEY]) // 1000
