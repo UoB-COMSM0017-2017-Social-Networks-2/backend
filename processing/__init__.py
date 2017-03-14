@@ -8,7 +8,6 @@ SHORT_INTERVAL_LENGTH = datetime.timedelta(hours=1)
 LONG_INTERVAL_LENGTH = datetime.timedelta(days=1)
 
 MINING_TOPIC_KEY = "TrendingTopic"
-MINING_REGION_KEY = "Woeid"
 MINING_TEXT_KEY = "text"
 MINING_ID_KEY = "id"
 MINING_TIMESTAMP_KEY = "timestamp_ms"
@@ -49,7 +48,7 @@ class Tweet:
         self.text = tweet_obj["text"]
         self.tweet_id = tweet_obj["tweet_id"]
         self.sentiment = tweet_obj["sentiment"]
-        self.woeid = tweet_obj["woeid"]
+        self.region_id = tweet_obj["region_id"]
         self.timestamp = tweet_obj["timestamp"]
         self.topic = tweet_obj["topic"]
 
@@ -71,8 +70,8 @@ class Tweet:
         arr["text"] = tweet_obj[MINING_TEXT_KEY]
         arr["tweet_id"] = tweet_obj[MINING_ID_KEY]
         arr["sentiment"] = sentiment.get_tweet_sentiment(tweet_obj)
-        # TODO: compute woeid
-        arr["woeid"] = None
+        # TODO: compute region_id
+        arr["region_id"] = None
         arr["timestamp"] = int(tweet_obj[MINING_TIMESTAMP_KEY]) // 1000
         arr["topic"] = tweet_obj[MINING_TOPIC_KEY]
         return Tweet(arr)
@@ -82,7 +81,7 @@ class Tweet:
             "text": self.text,
             "tweet_id": self.tweet_id,
             "sentiment": self.sentiment,
-            "woeid": self.woeid,
+            "region_id": self.region_id,
             "timestamp": self.timestamp,
             "topic": self.topic
         }

@@ -12,7 +12,7 @@ def get_tweet_time(tweet):
 
 
 def get_tweet_region(tweet):
-    return regions.get_region_by_woeid(tweet.woeid)
+    return regions.get_region_by_id(tweet.region_id)
 
 
 def get_tweets_after(tweets, start):
@@ -238,7 +238,7 @@ class StatusAggregate:
     def get_global_topic_evolution(self, topic_id):
         self.validate_topic(topic_id)
         global_region = regions.get_global_region()
-        return self.get_topic_location_evolution(topic_id, global_region.woeid)
+        return self.get_topic_location_evolution(topic_id, global_region.get_id())
 
     def get_topic_location_evolution(self, topic_id, location_id):
         self.validate_topic(topic_id)
