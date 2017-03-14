@@ -147,4 +147,4 @@ crashlytics-build.properties
 fabric.properties
 
 config.cfg
-output
+output/*

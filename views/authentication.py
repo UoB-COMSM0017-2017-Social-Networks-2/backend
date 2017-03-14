@@ -24,13 +24,12 @@ def store_credentials(user, token, secret):
 
 
 @app.route('/oauth_authorized')
-@twitter.authorized_handler
 def oauth_authorized(resp):
     next_url = request.args.get('next') or url_for('index')
+    resp = twitter.authorized_response()
     if resp is None:
         flash(u'You denied the request to sign in.')
         return redirect(next_url)
     store_credentials(user=resp['screen_name'], token=resp['oauth_token'], secret=resp['oauth_token_secret'])
-
     flash('You were signed in as %s' % resp['screen_name'])
     return redirect(next_url)

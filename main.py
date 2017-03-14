@@ -1,6 +1,6 @@
 import logging
 
-from flask import Flask, session
+from flask import Flask
 
 app = Flask("SN2", template_folder='templates')
 app.config.from_pyfile('config.cfg')
