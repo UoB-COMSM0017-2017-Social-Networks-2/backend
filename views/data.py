@@ -1,7 +1,12 @@
+import csv
+import io
+
 from flask import make_response, jsonify
-from processing import data
+
 from main import app
-import io, csv
+from processing import data
+
+
 def output_csv_file(filename, data):
     sio = io.StringIO()
     cw = csv.writer(sio)
@@ -95,7 +100,10 @@ def get_topic_interval_data(topic_id, interval):
     """
     topic_interval_data = data.get_topic_interval_data_per_region(topic_id, interval)
     data_array = []
-    # TODO: convert to list
+    for record in topic_interval_data.items():
+        data_array.append([
+            record["region_id"], record["popularity"], record["average_sentiment"], record["overall_sentiment"]
+        ])
     return output_csv_file("{}.csv".format(interval), data_array)
 
 

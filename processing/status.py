@@ -66,6 +66,14 @@ class StatusInterval:
             })
         return result
 
+    def validate_topic(self, topic_id):
+        if topic_id not in self.topic_data:
+            raise Exception("Invalid topic in this interval!")
+
+    def get_topic_data_per_region(self, topic_id):
+        self.validate_topic(topic_id)
+        return self.topic_data[topic_id].get_data_per_region()
+
     def discusses_topic(self, topic_id):
         return topic_id in self.topic_data
 
@@ -110,13 +118,26 @@ class StatusIntervalTopic:
     def get_location_data(self, location_id):
         return self.location_data[location_id]
 
+    def get_data_per_region(self):
+        result = dict()
+        for region in self.location_data:
+            data = self.location_data[region]
+            result[region] = {
+                "region_id": region.get_id(),
+                "popularity": data.get_popularity(),
+                "overall_sentiment": data.get_overall_sentiment(),
+                "average_sentiment": data.get_average_sentiment()
+            }
+        return result
+
 
 class StatusIntervalTopicRegion:
-    def __init__(self, popularity, nb_positive, nb_negative, nb_neutral):
+    def __init__(self, popularity, nb_positive, nb_negative, nb_neutral, average_sentiment):
         self.popularity = popularity
         self.nb_positive = nb_positive
         self.nb_negative = nb_negative
         self.nb_neutral = nb_neutral
+        self.average_sentiment = average_sentiment
 
     @classmethod
     def from_tweets(cls, tweets):
@@ -124,7 +145,11 @@ class StatusIntervalTopicRegion:
         nb_positive = sum([1 for tweet in tweets if tweet.positive_sentiment()])
         nb_negative = sum([1 for tweet in tweets if tweet.negative_sentiment()])
         nb_neutral = sum([1 for tweet in tweets if tweet.neutral_sentiment()])
-        return StatusIntervalTopicRegion(popularity, nb_positive, nb_negative, nb_neutral)
+        sentiments = [tweet.get_compound_sentiment() for tweet in tweets]
+        average_sentiment = 0
+        if len(tweets) > 0:
+            average_sentiment = sum(sentiments) / len(sentiments)
+        return StatusIntervalTopicRegion(popularity, nb_positive, nb_negative, nb_neutral, average_sentiment)
 
     @classmethod
     def from_dict(cls, data):
@@ -132,15 +157,20 @@ class StatusIntervalTopicRegion:
         nb_positive = data['nb_positive']
         nb_negative = data['nb_negative']
         nb_neutral = data['nb_neutral']
-        return StatusIntervalTopicRegion(popularity, nb_positive, nb_negative, nb_neutral)
+        average_sentiment = data['average_sentiment']
+        return StatusIntervalTopicRegion(popularity, nb_positive, nb_negative, nb_neutral, average_sentiment)
 
     def get_dict(self):
         return {
             "popularity": self.popularity,
             "nb_positive": self.nb_positive,
             "nb_negative": self.nb_negative,
-            "nb_neutral": self.nb_neutral
+            "nb_neutral": self.nb_neutral,
+            "average_sentiment": self.average_sentiment
         }
+
+    def get_average_sentiment(self):
+        return self.average_sentiment
 
     def get_popularity(self):
         return self.popularity
@@ -238,8 +268,7 @@ class StatusAggregate:
     def get_topic_interval_data_per_region(self, topic_id, interval):
         self.validate_topic(topic_id)
         self.validate_interval(interval)
-        # TODO: implement
-        return None
+        return self.intervals[interval].get_topic_data_per_region(topic_id)
 
     def get_topic_interval_location_data(self, topic_id, interval, location_id):
         self.validate_topic(topic_id)

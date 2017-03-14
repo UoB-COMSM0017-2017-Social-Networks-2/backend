@@ -51,6 +51,9 @@ class Tweet:
         self.timestamp = tweet_obj["timestamp"]
         self.topic = tweet_obj["topic"]
 
+    def get_compound_sentiment(self):
+        return self.sentiment["compound"]
+
     @classmethod
     def load_raw_tweet(cls, tweet_obj):
         arr = dict()
