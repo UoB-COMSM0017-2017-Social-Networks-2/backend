@@ -1,5 +1,7 @@
 import json
 
+from shapely.geometry import Point, shape
+
 
 class Region:
     """
@@ -10,6 +12,18 @@ class Region:
         self.name = name
         self.region_id = region_id
         self.parent_id = parent_id
+        self.shape = None
+
+    def set_shape(self, region_shape):
+        self.shape = region_shape
+
+    def has_shape(self):
+        return self.shape is not None
+
+    def contains_point(self, point):
+        if not self.has_shape():
+            return False
+        return self.shape.contains(point)
 
     def get_parent(self):
         for region in all_regions_dict.values():
@@ -24,13 +38,14 @@ all_regions_dict = dict()
 def load_regions():
     global all_regions_dict
     all_regions_dict = dict()
-    with open('Coordinates2Region/GBR_GeoJSON.json') as file:
+    with open('data/GBR_GeoJSON.json') as file:
         gbr_data = json.load(file)
         regions_data = gbr_data["features"]
         for region_data in regions_data:
             properties = region_data["properties"]
             ids = []
             names = []
+            leaf_id = None
             for i in range(10):
                 name_key = "NAME_{}".format(i)
                 id_key = "ID_{}".format(i)
@@ -39,7 +54,8 @@ def load_regions():
                         print("#ids != #names")
                     break
                 names.append(properties[name_key])
-                ids.append("{}_{}".format(i, properties[id_key]))
+                leaf_id = "{}_{}".format(i, properties[id_key])
+                ids.append(leaf_id)
 
             prev_region_id = None
             for name, region_id in zip(names, ids):
@@ -47,6 +63,8 @@ def load_regions():
                     region = Region(name, region_id, prev_region_id)
                     all_regions_dict[region_id] = region
                 prev_region_id = region_id
+
+            all_regions_dict[leaf_id].set_shape(shape(region_data['geometry']))
 
 
 if len(all_regions_dict) == 0:
@@ -75,3 +93,12 @@ def get_region_by_id(region_id):
 
 def get_global_region():
     return get_region_by_id("0_242")
+
+
+# Function that returns region name based on input data
+def get_location(longitude, latitude):
+    point = Point(longitude, latitude)
+    for region in get_all_regions():
+        if region.has_shape() and region.contains_point(point):
+            return region
+    return None

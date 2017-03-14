@@ -2,3 +2,4 @@ Flask==0.11.1
 Flask-OAuthlib==0.9.3
 nltk==3.2.2
 twython==3.4.0
+shapely==1.6b4
