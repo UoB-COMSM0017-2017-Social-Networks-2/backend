@@ -10,7 +10,11 @@ from tweepy import OAuthHandler
 from tweepy import Stream
 from tweepy.streaming import StreamListener
 
+import mining.authentication
 from main import app
+from processing.update import process_new_tweets
+
+MINING_TWEET_JSON_FILE = 'output/tweetlocation.json'
 
 # sample woeid code for countries USA, UK, Brazil, Canada, India
 # woeidList = ['23424977','23424975','23424768', '23424775', '23424848']
@@ -54,11 +58,17 @@ class StdOutListener(StreamListener):
             tweet = data['text']
             # print(json.dumps(tweet))
             # If tweet content contains any of the trending topic.
-            for topic in TrendingTopics:
-                if (topic in json.dumps(tweet)):
-                    data['TrendingTopic'] = topic
-                    with open('tweetlocation.json','a') as tf:
-                        tf.write(originalData) 
+            if any(topic in json.dumps(tweet) for topic in TrendingTopics):
+                # Add trending topic and original bounding box as attribute
+                # data['TrendingTopic'] = topic
+                print(json.dumps(tweet))
+                # data['QueriedBoundingBox'] = location[0]
+                # Convert the json object again to string
+                dataObj = json.dumps(data)
+                # Appending the data in tweetlondon.json file
+                with open(MINING_TWEET_JSON_FILE, 'a') as tf:
+                    tf.write(dataObj + "\n")
+                    # prints on console
             return True
         else:
             startTime = time.time();
@@ -68,13 +78,34 @@ class StdOutListener(StreamListener):
         print(status)
 
 
-def stream_tweets_for_region(name, bounding_box, keys):
+def send_tweets():
+    print("SENDING TWEETS!")
+    tweets = []
+    with open(MINING_TWEET_JSON_FILE, 'r') as f:
+        for line in f.readlines():
+            if len(line.strip()) == 0:
+                continue
+            tweets.append(json.loads(line))
+    process_new_tweets(tweets)
+
+    # This runs the system command of transfering file to s3 bucket
+    proc = subprocess.Popen(["aws", "s3", "cp", MINING_TWEET_JSON_FILE, "s3://sentiment-bristol"],
+                            stdout=subprocess.PIPE, shell=True)
+    (out, err) = proc.communicate()
+    print("program output:", out)
+    # Remove file
+    proc = subprocess.Popen(["rm", MINING_TWEET_JSON_FILE], stdout=subprocess.PIPE, shell=True)
+    (out, err) = proc.communicate()
+    print("Removed JSON: {}".format(out))
+
+
+def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
     global TrendingTopics
     print("Streaming tweets for {}".format(name))
-    consumer_key = keys['CONSUMER_KEY']
-    consumer_secret = keys['CONSUMER_SECRET']
-    access_token = keys['ACCESS_TOKEN']
-    access_secret = keys['ACCESS_SECRET']
+    consumer_key = consumer_keys['CONSUMER_KEY']
+    consumer_secret = consumer_keys['CONSUMER_SECRET']
+    access_token = user_keys['ACCESS_TOKEN']
+    access_secret = user_keys['ACCESS_SECRET']
     # print("\n ########################################## Data mining for location : ", location, "started ########################################## \n")
     # print(startTime)
     count = 0
@@ -87,12 +118,19 @@ def stream_tweets_for_region(name, bounding_box, keys):
     stream = Stream(auth, l)
 
     while True:
-        count = count + 1
+
+        # # send data to s3 every 5th hour
+        # # only one thread is required to write data to s3 bucket
+        if count % 5 == 0 and name == streaming_regions[0]['name']:
+            try:
+                send_tweets()
+            except:
+                print("An error occurred sending tweets, keeping all data for now!")
+
+        count += 1
         # This runs every an hour
-        print(
-            '\n ****************************************** Tweet Collection for next {0} hours started ************************************************************** \n'.format(
-                count / 2))
-        print(count)
+        print('\n************************* Tweet Collection for next {0} hours started *************************\n'
+              .format(count / 2))
 
         # for country in location:
         for country in woeidList:
@@ -109,15 +147,6 @@ def stream_tweets_for_region(name, bounding_box, keys):
             # Stream the tweets for given location coordinates
             stream.filter(locations=bounding_box)
 
-    # # send data to s3 every 5th hour
-    # # only one thread is required to write data to s3 bucket
-    if (count % 5 == 0 and count != 0 and location[1] == 49.71):
-        # This runs the system command of transfering file to s3 bucket
-        proc = subprocess.Popen(["aws", "s3", "cp", "tweetlocation.json", "s3://sentiment-bristol"],
-                                stdout=subprocess.PIPE, shell=True)
-        (out, err) = proc.communicate()
-        print("program output:", out)
-
 
 def start_mining():
     _thread.start_new_thread(start_threads, ())
@@ -125,12 +154,23 @@ def start_mining():
 
 def start_threads():
     try:
-        min_length = min(len(streaming_regions), len(app.config['MINING_KEYS']))
-        for region, keys in zip(streaming_regions[:min_length], app.config['MINING_KEYS'][:min_length]):
-            _thread.start_new_thread(stream_tweets_for_region, (region['name'], region['bounding_box'], keys))
+        consumer_keys = {
+            "CONSUMER_KEY": app.config['TWITTER_CONSUMER_KEY'],
+            "CONSUMER_SECRET": app.config['TWITTER_CONSUMER_SECRET']
+        }
+        mining_keys = mining.authentication.get_authentication_keys()
+        # min_length = min(len(streaming_regions), len(app.config['MINING_KEYS']))
+        min_length = min(len(streaming_regions), len(mining_keys))
+        print("Found {} regions and key tuples".format(min_length))
+        # for region, user_keys in zip(streaming_regions[:min_length], app.config['MINING_KEYS'][:min_length]):
+        for region, user_keys in zip(streaming_regions[:min_length], mining_keys[:min_length]):
+            _thread.start_new_thread(stream_tweets_for_region, (region['name'], region['bounding_box'], consumer_keys, {
+                "ACCESS_TOKEN": user_keys[0],
+                "ACCESS_SECRET": user_keys[1]
+            }))
             time.sleep(10)
-    except:
-        print("Error: unable to start the thread")
+    except Exception as ex:
+        print("Error: unable to start the thread: {}".format(ex))
 
     while 1:
         pass
