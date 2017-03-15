@@ -1,10 +1,20 @@
 import csv
+import datetime
 import io
 
 from flask import make_response, jsonify
 
 from main import app
 from processing import data
+
+
+def parse_interval_string(interval_string):
+    part1, part2 = interval_string.split("-")
+    return datetime.datetime.utcfromtimestamp(int(part1)), datetime.datetime.utcfromtimestamp(int(part2))
+
+
+def interval_to_string(interval):
+    return "{}-{}".format(interval[0].timestamp(), interval[1].timestamp())
 
 
 def output_csv_file(filename, data):
@@ -29,13 +39,24 @@ def get_current_topics():
     })
 
 
+@app.route('/intervals.json')
+def get_intervals():
+    """
+    :return: List of available intervals
+    """
+    intervals = data.get_intervals()
+    return jsonify({
+        "intervals": [interval_to_string(interval) for interval in intervals]
+    })
+
+
 @app.route('/interval/<string:interval>/topics.json')
 def get_interval_topics(interval):
     """
     :param interval:
     :return: List of topics that were monitored during interval as JSON response.
     """
-    topics = data.get_interval_topics(interval)
+    topics = data.get_interval_topics(parse_interval_string(interval))
     return jsonify({
         "topics": topics
     })

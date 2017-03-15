@@ -44,32 +44,33 @@ startTime = time.time()
 
 # timeLimit = 60  # 1/2 hour limit
 
+MINUTES_PER_QUERY = 1
+QUERIES_PER_BATCH = 2
+
 # This is a basic listener that just prints received tweets to stdout.
 class StdOutListener(StreamListener):
     # On every tweet arrival
     def on_data(self, data):
         global startTime, TrendingTopics
-        original_data = data
-        if ((time.time() - startTime) < (60 * 15)):
+        if time.time() - startTime < 60 * MINUTES_PER_QUERY:
             # Convert the string data to pyhton json object.
             data = json.loads(html.unescape(data))
             # Gives the content of the tweet.
             tweet = data['text']
-            # print(json.dumps(tweet))
             # If tweet content contains any of the trending topic.
             for topic in TrendingTopics:
-                if (topic in json.dumps(tweet)):
+                if topic in str(tweet):
                     print("Received relevant tweet: {}".format(str(tweet)))
                     data['TrendingTopic'] = topic
                     with open(MINING_TWEET_JSON_FILE, 'a') as tf:
-                        tf.write(original_data)
+                        tf.write(json.dumps(data)+'\n')
             return True
         else:
             startTime = time.time()
             return False
 
     def on_error(self, status):
-        print(status)
+        print("Received streaming error: {}".format(status))
 
 
 def send_tweets():
@@ -79,7 +80,12 @@ def send_tweets():
         for line in f.readlines():
             if len(line.strip()) == 0:
                 continue
-            tweets.append(json.loads(line))
+            #print(line)
+            try:
+                tweets.append(json.loads(line.strip()))
+            except Exception as ex:
+                print(ex)
+                print("error for tweet: {}".format(line))
     process_new_tweets(tweets)
 
     # This runs the system command of transfering file to s3 bucket
@@ -115,7 +121,7 @@ def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
 
         # # send data to s3 every 5th hour
         # # only one thread is required to write data to s3 bucket
-        if count % 5 == 0 and name == streaming_regions[0]['name']:
+        if count % QUERIES_PER_BATCH == 0 and name == streaming_regions[0]['name']:
             #try:
             send_tweets()
             #except Exception as ex:

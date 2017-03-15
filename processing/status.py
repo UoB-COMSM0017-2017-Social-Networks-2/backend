@@ -71,6 +71,10 @@ class StatusInterval:
         if topic_id not in self.topic_data:
             raise Exception("Invalid topic in this interval!")
 
+    def get_topics(self):
+        print(self.topic_data)
+        return list(self.topic_data.keys())
+
     def get_topic_data_per_region(self, topic_id):
         self.validate_topic(topic_id)
         return self.topic_data[topic_id].get_data_per_region()
@@ -192,7 +196,7 @@ class StatusAggregate:
         # intervals: interval -> StatusInterval
         self.intervals = dict()
         for interval in intervals:
-            self.intervals[interval] = StatusInterval(interval)
+            self.intervals[interval] = intervals[interval]
         self.short_term_start = short_term_start
         if short_term_start is None:
             self.short_term_start = get_short_term_start()
@@ -208,6 +212,9 @@ class StatusAggregate:
         if 'short_term_start' in data:
             short_term_start = datetime.datetime.fromtimestamp(data['short_term_start'])
         return StatusAggregate(intervals, short_term_start)
+
+    def get_intervals(self):
+        return self.intervals.keys()
 
     def to_dict(self):
         result = []
@@ -234,7 +241,7 @@ class StatusAggregate:
 
     def get_topics(self, interval):
         self.validate_interval(interval)
-        return None
+        return self.intervals[interval].get_topics()
 
     def get_last_interval(self):
         last = None
