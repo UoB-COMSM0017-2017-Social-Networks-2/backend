@@ -57,11 +57,11 @@ class StdOutListener(StreamListener):
             data = json.loads(html.unescape(data))
             # Gives the content of the tweet.
             tweet = data['text']
-            print("Received tweet: {}".format(tweet))
             # print(json.dumps(tweet))
             # If tweet content contains any of the trending topic.
             for topic in TrendingTopics:
                 if (topic in json.dumps(tweet)):
+                    print("Received relevant tweet: {}".format(str(tweet)))
                     data['TrendingTopic'] = topic
                     with open(MINING_TWEET_JSON_FILE, 'a') as tf:
                         tf.write(original_data)
