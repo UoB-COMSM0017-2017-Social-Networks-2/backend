@@ -16,18 +16,37 @@ from main import app
 # woeidList = ['23424977','23424975','23424768', '23424775', '23424848']
 woeidList = ['23424975']  # Used to fetch trending topics
 # sample location bounding box coordinates of south west england
-location = [-5.71, 49.71, -0.62, 53.03]  # Used to fetch all tweets for this location
-# south east england
-location1 = [-0.56, 50.77, 1.83, 53.07]
-# central uk
-location2 = [-5.38, 53.09, 0.53, 55.15]
-# north uk
-location3 = [-7.48, 55.21, -0.35, 61.05]
-# north Ireland
-location4 = [-10.5359, 53.2586, -5.2823, 55.2102]
-# south Ireland
-location5 = [-10.83, 51.22, -5.57, 53.27]
-# location1 = [-87.122124,33.38376,-86.57815,33.678715]
+streaming_regions = [
+    {
+        "name": "South West England",
+        "bounding_box": [-5.71, 49.71, -0.62, 53.03]
+    },
+    # south east england
+    {
+        "name": "South East England",
+        "bounding_box": [-0.56, 50.77, 1.83, 53.07]
+    },
+    # Central UK
+    {
+        "name": "Central UK",
+        "bounding_box": [-5.38, 53.09, 0.53, 55.15]
+    },
+    # North UK
+    {
+        "name": "Northern UK",
+        "bounding_box": [-7.48, 55.21, -0.35, 61.05]
+    },
+    # Northern Ireland
+    {
+        "name": "Northern Ireland",
+        "bounding_box": [-10.5359, 53.2586, -5.2823, 55.2102]
+    },
+    # Southern Ireland
+    {
+        "name": "Southern Ireland",
+        "bounding_box": [-10.83, 51.22, -5.57, 53.27]
+    }
+]
 
 TrendingTopics = []
 # count = 0;
@@ -68,15 +87,20 @@ class StdOutListener(StreamListener):
         print(status)
 
 
-def StreamTheTweets(consumerKey, consumerSecret, accessToken, accessSecret, location):
+def stream_tweets_for_region(name, bounding_box, keys):
     global TrendingTopics
+    print("Streaming tweets for {}".format(name))
+    consumer_key = keys['CONSUMER_KEY']
+    consumer_secret = keys['CONSUMER_SECRET']
+    access_token = keys['ACCESS_TOKEN']
+    access_secret = keys['ACCESS_SECRET']
     # print("\n ########################################## Data mining for location : ", location, "started ########################################## \n")
     # print(startTime)
     count = 0
     # This handles Twitter authetification and the connection to Twitter Streaming API
     l = StdOutListener()
-    auth = OAuthHandler(consumerKey, consumerSecret)
-    auth.set_access_token(accessToken, accessSecret)
+    auth = OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_secret)
 
     api = API(auth)
     stream = Stream(auth, l)
@@ -102,7 +126,7 @@ def StreamTheTweets(consumerKey, consumerSecret, accessToken, accessSecret, loca
             # print("\n &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Trending topic for this time are &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
             print(TrendingTopics, "\n")
             # Stream the tweets for given location coordinates
-            stream.filter(locations=[location[0], location[1], location[2], location[3]])
+            stream.filter(locations=bounding_box)
 
     # # send data to s3 every 5th hour
     # # only one thread is required to write data to s3 bucket
@@ -114,50 +138,16 @@ def StreamTheTweets(consumerKey, consumerSecret, accessToken, accessSecret, loca
         print("program output:", out)
 
 
-# multithreading function
-def multiThreading(threadName):
-    if threadName == "SouthWestEngland":
-        StreamTheTweets(app.config['BEN_CONSUMER_KEY'], app.config['BEN_CONSUMER_SECRET'],
-                        app.config['BEN_ACCESS_TOKEN'], app.config['BEN_ACCESS_TOKEN_SECRET'], location)
-
-    elif threadName == "SouthEastEngland":
-        StreamTheTweets(app.config['JULIAN_CONSUMER_KEY'], app.config['JULIAN_CONSUMER_SECRET'],
-                        app.config['JULIAN_ACCESS_TOKEN'], app.config['JULIAN_ACCESS_TOKEN_SECRET'], location1)
-
-    elif threadName == "CentralUk":
-        StreamTheTweets(app.config['HOLI_CONSUMER_KEY'], app.config['HOLI_CONSUMER_SECRET'],
-                        app.config['HOLI_ACCESS_TOKEN'], app.config['HOLI_ACCESS_TOKEN_SECRET'], location2)
-
-    elif threadName == "NorthUK":
-        StreamTheTweets(app.config['KANU_CONSUMER_KEY'], app.config['KANU_CONSUMER_SECRET'],
-                        app.config['KANU_ACCESS_TOKEN'], app.config['KANU_ACCESS_TOKEN_SECRET'], location3)
-
-    elif threadName == "NorthIreland":
-        StreamTheTweets(app.config['FLORIS_CONSUMER_KEY'], app.config['FLORIS_CONSUMER_SECRET'],
-                        app.config['FLORIS_ACCESS_TOKEN'], app.config['FLORIS_ACCESS_TOKEN_SECRET'], location4)
-
-    elif threadName == "SouthIreland":
-        StreamTheTweets(app.config['VISHAL_CONSUMER_KEY'], app.config['VISHAL_CONSUMER_SECRET'],
-                        app.config['VISHAL_ACCESS_TOKEN'], app.config['VISHAL_ACCESS_TOKEN_SECRET'], location5)
-
-
 def start_mining():
     _thread.start_new_thread(start_threads, ())
 
 
 def start_threads():
     try:
-        _thread.start_new_thread(multiThreading, ("SouthWestEngland",))
-        time.sleep(10)
-        _thread.start_new_thread(multiThreading, ("SouthEastEngland",))
-        time.sleep(10)
-        _thread.start_new_thread(multiThreading, ("CentralUk",))
-        time.sleep(10)
-        _thread.start_new_thread(multiThreading, ("NorthUK",))
-        time.sleep(10)
-        _thread.start_new_thread(multiThreading, ("NorthIreland",))
-        time.sleep(10)
-        _thread.start_new_thread(multiThreading, ("SouthIreland",))
+        min_length = min(len(streaming_regions), len(app.config['MINING_KEYS']))
+        for region, keys in zip(streaming_regions[:min_length], app.config['MINING_KEYS'][:min_length]):
+            _thread.start_new_thread(stream_tweets_for_region, (region['name'], region['bounding_box'], keys))
+            time.sleep(10)
     except:
         print("Error: unable to start the thread")
 
