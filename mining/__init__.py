@@ -51,6 +51,7 @@ class StdOutListener(StreamListener):
     # On every tweet arrival
     def on_data(self, data):
         global startTime, TrendingTopics
+        original_data = data
         if ((time.time() - startTime) < (60 * 15)):
             # Convert the string data to pyhton json object.
             data = json.loads(html.unescape(data))
@@ -58,20 +59,14 @@ class StdOutListener(StreamListener):
             tweet = data['text']
             # print(json.dumps(tweet))
             # If tweet content contains any of the trending topic.
-            if any(topic in json.dumps(tweet) for topic in TrendingTopics):
-                # Add trending topic and original bounding box as attribute
-                # data['TrendingTopic'] = topic
-                print(json.dumps(tweet))
-                # data['QueriedBoundingBox'] = location[0]
-                # Convert the json object again to string
-                dataObj = json.dumps(data)
-                # Appending the data in tweetlondon.json file
-                with open(MINING_TWEET_JSON_FILE, 'a') as tf:
-                    tf.write(dataObj + "\n")
-                    # prints on console
+            for topic in TrendingTopics:
+                if (topic in json.dumps(tweet)):
+                    data['TrendingTopic'] = topic
+                    with open('tweetlocation.json', 'a') as tf:
+                        tf.write(original_data)
             return True
         else:
-            startTime = time.time();
+            startTime = time.time()
             return False
 
     def on_error(self, status):
