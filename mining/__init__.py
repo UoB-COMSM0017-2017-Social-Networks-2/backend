@@ -66,7 +66,7 @@ class StdOutListener(StreamListener):
                 dataObj = json.dumps(data)
                 # Appending the data in tweetlondon.json file
                 with open(MINING_TWEET_JSON_FILE, 'a') as tf:
-                    tf.write(dataObj)
+                    tf.write(dataObj+"\n")
                     # prints on console
             return True
         else:
