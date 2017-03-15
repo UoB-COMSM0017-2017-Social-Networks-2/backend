@@ -78,6 +78,7 @@ class StdOutListener(StreamListener):
 
 
 def send_tweets():
+    print("SENDING TWEETS!")
     tweets = []
     with open(MINING_TWEET_JSON_FILE, 'r') as f:
         for line in f.readlines():

@@ -25,13 +25,14 @@ def write_disk_tweets(tweets):
         json.dump([tweet.get_dict() for tweet in tweets], f)
 
 
-def process_new_tweets(new_tweets):
+def process_new_tweets(new_tweets_original):
+    print("Processing new tweets!")
     # Load tweets from disk
     disk_tweets = load_disk_tweets()
     all_tweet_ids = {tweet.tweet_id for tweet in disk_tweets}
     # Convert new_tweets to Tweet objects
     new_tweets = []
-    for tweet_obj in new_tweets:
+    for tweet_obj in new_tweets_original:
         t = Tweet.load_raw_tweet(tweet_obj)
         if t.tweet_id in all_tweet_ids:
             continue
