@@ -12,7 +12,7 @@ from tweepy.streaming import StreamListener
 
 from main import app
 
-MINING_TWEET_LOCATION_FILE = 'output/tweetlocation.json'
+MINING_TWEET_JSON_FILE = 'output/tweetlocation.json'
 
 # sample woeid code for countries USA, UK, Brazil, Canada, India
 # woeidList = ['23424977','23424975','23424768', '23424775', '23424848']
