@@ -16,9 +16,7 @@ from processing.update import process_new_tweets
 
 MINING_TWEET_JSON_FILE = 'output/tweetlocation.json'
 
-# sample woeid code for countries USA, UK, Brazil, Canada, India
-# woeidList = ['23424977','23424975','23424768', '23424775', '23424848']
-woeidList = ['23424975']  # Used to fetch trending topics
+COUNTRY_ID = '23424975'  # UK
 streaming_regions = [{
     "name": "South West England",
     "bounding_box": [-5.71, 49.71, -0.62, 53.03]
@@ -128,20 +126,16 @@ def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
         print('\n************************* Tweet Collection for next {0} hours started *************************\n'
               .format(count / 2))
 
-        # for country in location:
-        for country in woeidList:
-            trends1 = api.trends_place(country)
-            data = trends1[0]
-            # grab the trends
-            trends = data['trends']
-            # grab the name from each trend
-            TrendingTopics = [trend['name'] for trend in trends[:10]]
-            # put all the names together with a ' ' separating them
-            # trendsName = ' '.join(names)
-            # print("\n &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Trending topic for this time are &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-            print(TrendingTopics, "\n")
-            # Stream the tweets for given location coordinates
-            stream.filter(locations=bounding_box)
+        trends1 = api.trends_place(COUNTRY_ID)
+        data = trends1[0]
+        # grab the trends
+        trends = data['trends']
+        # grab the name from each trend
+        TrendingTopics = [trend['name'] for trend in trends[:10]]
+        # put all the names together with a ' ' separating them
+        print("Trending Topics: {}".format(TrendingTopics))
+        # Stream the tweets for given location coordinates
+        stream.filter(locations=bounding_box)
 
 
 def start_mining():
@@ -164,7 +158,7 @@ def start_threads():
                 "ACCESS_TOKEN": user_keys[0],
                 "ACCESS_SECRET": user_keys[1]
             }))
-            time.sleep(10)
+            time.sleep(60)
     except Exception as ex:
         print("Error: unable to start the thread: {}".format(ex))
 
