@@ -14,13 +14,18 @@ def login():
 def store_credentials(user, token, secret):
     session['twitter_token'] = (token, secret)
     session['twitter_user'] = user
-    with open('output/keys.json', 'w+') as f:
-        try:
+    data = dict()
+    try:
+        with open('output/keys.json', 'r') as f:
             data = json.load(f)
-        except json.JSONDecodeError:
-            data = dict()
-        data[user] = (token, secret)
-        json.dump(data, f)
+    except:
+        print("An error happened reading the existing Twitter credentials.")
+    data[user] = (token, secret)
+    try:
+        with open('output/keys.json', 'w') as f:
+            json.dump(data, f)
+    except:
+        print("An error happened writing the new Twitter credentials.")
 
 
 @app.route('/oauth_authorized')
