@@ -127,15 +127,15 @@ class StatusIntervalTopic:
         return self.location_data[location_id]
 
     def get_data_per_region(self):
-        result = dict()
+        result = []
         for region in self.location_data:
             data = self.location_data[region]
-            result[region] = {
-                "region_id": region.get_id(),
+            result.append({
+                "region_id": region,
                 "popularity": data.get_popularity(),
                 "overall_sentiment": data.get_overall_sentiment(),
                 "average_sentiment": data.get_average_sentiment()
-            }
+            })
         return result
 
 
@@ -217,6 +217,7 @@ class StatusAggregate:
         short_term_start = None
         if 'short_term_start' in data:
             short_term_start = datetime.datetime.fromtimestamp(data['short_term_start'])
+        logging.info("Found {} intervals".format(len(interval_data)))
         return StatusAggregate(intervals, short_term_start)
 
     def get_intervals(self):
