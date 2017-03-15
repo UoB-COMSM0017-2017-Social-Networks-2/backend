@@ -1,7 +1,6 @@
 import csv
 import datetime
 import io
-import logging
 
 from flask import make_response, jsonify
 
@@ -105,11 +104,11 @@ def get_interval_topics_details(interval):
     :param interval:
     :return: Popularity and overall sentiment of all topics in interval as a CSV response.
     """
-    topics_details = data.get_interval_topics_details(interval)
-    data_array = [
-        (topic["topic"], topic["topic"], topic["nb_tweets"], topic["overall_sentiment"], topic["positive_ratio"])
-        for topic in topics_details
-        ]
+    topics_details = data.get_interval_topics_details(parse_interval_string(interval))
+    data_array = [("TOPIC", "TOPIC", "Popularity", "Overall sentiment", "Positive ratio", "Average sentiment")] + \
+                 [(topic["topic"], topic["topic"], topic["nb_tweets"], topic["overall_sentiment"],
+                   topic["positive_ratio"], topic["average_sentiment"])
+                  for topic in topics_details]
     return output_csv_file("data.csv", data_array)
 
 

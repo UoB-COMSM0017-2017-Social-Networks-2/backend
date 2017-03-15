@@ -63,7 +63,8 @@ class StatusInterval:
                 "topic": topic,
                 "nb_tweets": data.get_popularity(),
                 "overall_sentiment": data.get_overall_sentiment(),
-                "positive_ratio": data.get_positive_ratio()
+                "positive_ratio": data.get_positive_ratio(),
+                "average_sentiment": data.get_average_sentiment()
             })
         return result
 
@@ -183,6 +184,7 @@ class StatusIntervalTopicRegion:
         return self.popularity
 
     def get_overall_sentiment(self):
+        logging.info("dict: {}".format(self.get_dict()))
         if self.nb_positive > max(self.nb_neutral, self.nb_negative):
             return 1
         if self.nb_negative > max(self.nb_neutral, self.nb_positive):
@@ -190,6 +192,8 @@ class StatusIntervalTopicRegion:
         return 0
 
     def get_positive_ratio(self):
+        if self.nb_positive == self.nb_negative == 0:
+            return 0
         return self.nb_positive / (self.nb_positive + self.nb_negative)
 
 
