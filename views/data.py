@@ -1,11 +1,12 @@
 import csv
 import datetime
 import io
+import logging
 
 from flask import make_response, jsonify
 
 from main import app
-from processing import data
+from processing import data, regions
 
 
 def parse_interval_string(interval_string):
@@ -14,15 +15,15 @@ def parse_interval_string(interval_string):
 
 
 def interval_to_string(interval):
-    return "{}-{}".format(interval[0].timestamp(), interval[1].timestamp())
+    return "{}-{}".format(int(interval[0].timestamp()), int(interval[1].timestamp()))
 
 
 def output_csv_file(filename, data):
     sio = io.StringIO()
     cw = csv.writer(sio)
-    output = make_response(sio.getvalue())
     for r in data:
         cw.writerow(r)
+    output = make_response(sio.getvalue())
     output.headers["Content-Disposition"] = "attachment; filename={}".format(filename)
     output.headers["Content-type"] = "text/csv"
     return output
@@ -46,7 +47,7 @@ def get_intervals():
     """
     intervals = data.get_intervals()
     return jsonify({
-        "intervals": [interval_to_string(interval) for interval in intervals]
+        "intervals": sorted([interval_to_string(interval) for interval in intervals])
     })
 
 
@@ -69,7 +70,7 @@ def get_topic_evolution(topic_id):
     :param topic_id:
     :return: Evolution of global topic popularity and sentiment over time as CSV response.
     """
-    return get_topic_location_evolution(topic_id, regions.get_global_region().woeid)
+    return get_topic_location_evolution(topic_id, regions.get_global_region().region_id)
 
 
 @app.route('/topic/<string:topic_id>/location/<string:location_id>/evolution.csv')
@@ -86,13 +87,13 @@ def get_topic_location_evolution(topic_id, location_id):
     neut_lines = []
     for interval in topic_evolution:
         timestamp = (interval["interval_start"] +
-                     interval["interval_end"]) // 2
+                     (interval["interval_end"] - interval["interval_start"]) / 2)
         pos_lines.append(
-            ["POS", interval["sentiment_distribution"]["positive"], timestamp])
+            ["POS", interval["sentiment_distribution"]["nb_positive"], timestamp])
         neut_lines.append(
-            ["NEUT", interval["sentiment_distribution"]["neutral"], timestamp])
+            ["NEUT", interval["sentiment_distribution"]["nb_neutral"], timestamp])
         neg_lines.append(
-            ["NEG", interval["sentiment_distribution"]["negative"], timestamp])
+            ["NEG", interval["sentiment_distribution"]["nb_negative"], timestamp])
     data_array = pos_lines + neut_lines + neg_lines
     return output_csv_file("evolution.csv", data_array)
 

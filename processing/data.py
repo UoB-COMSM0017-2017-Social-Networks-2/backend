@@ -13,9 +13,11 @@ def get_current_topics():
     logging.info("Last interval: {}".format(interval))
     return status.get_topics(interval)
 
+
 def get_intervals():
     status = load_disk_status()
     return status.get_intervals()
+
 
 def get_interval_topics(interval):
     status = load_disk_status()

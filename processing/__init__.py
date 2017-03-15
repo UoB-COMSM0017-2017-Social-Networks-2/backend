@@ -1,6 +1,7 @@
 import calendar
 import datetime
 
+from processing import regions
 from processing import sentiment
 
 SHORT_PERIOD = datetime.timedelta(days=7)
@@ -15,6 +16,15 @@ MINING_TIMESTAMP_KEY = "timestamp_ms"
 
 def get_attribute_if_exists(d, key):
     return d[key] if key in d else None
+
+
+def get_tweet_region_id(tweet_obj):
+    coordinates = tweet_obj['coordinates']
+    if coordinates is None:
+        return regions.get_global_region().region_id
+    else:
+        coordinates = coordinates["coordinates"]
+        return regions.get_smallest_region_by_coordinates(coordinates[0], coordinates[1]).region_id
 
 
 def get_short_term_start():
@@ -75,7 +85,7 @@ class Tweet:
         arr["tweet_id"] = tweet_obj[MINING_ID_KEY]
         arr["sentiment"] = sentiment.get_tweet_sentiment(tweet_obj)
         # TODO: compute region_id
-        arr["region_id"] = None
+        arr["region_id"] = get_tweet_region_id(tweet_obj)
         arr["timestamp"] = int(tweet_obj[MINING_TIMESTAMP_KEY]) // 1000
         arr["topic"] = get_attribute_if_exists(tweet_obj, MINING_TOPIC_KEY)
         return Tweet(arr)

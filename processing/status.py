@@ -100,6 +100,8 @@ class StatusIntervalTopic:
         all_regions = regions.get_all_regions()
         for region in all_regions:
             region_tweets = get_tweets_in_region(tweets, region)
+            if len(region_tweets) > 0:
+                print({tweet.region_id for tweet in region_tweets})
             location_data[region.region_id] = StatusIntervalTopicRegion.from_tweets(region_tweets)
         return StatusIntervalTopic(location_data)
 
@@ -263,24 +265,35 @@ class StatusAggregate:
         self.validate_topic(topic_id)
         self.validate_location(location_id)
         result = []
+        logging.info("Intervals: {}".format(len(self.intervals)))
         for interval in self.intervals:
-            if not interval.discusses_topic(topic_id):
-                result.append(None)
-            global_data = interval.get_location_data_for_topic(topic_id, location_id)
-            result.append({
+            interval_data = self.intervals[interval]
+            data = {
                 "interval_start": interval[0],
-                "interval_end": interval[1],
-                "sentiment_distribution": {
+                "interval_end": interval[1]
+            }
+            if not interval_data.discusses_topic(topic_id):
+                data["sentiment_distribution"] = {
+                    "nb_positive": 0,
+                    "nb_negative": 0,
+                    "nb_neutral": 0
+                }
+                data["present"] = False
+            else:
+                global_data = interval_data.get_location_data_for_topic(topic_id, location_id)
+                data["sentiment_distribution"] = {
                     "nb_positive": global_data.nb_positive,
                     "nb_negative": global_data.nb_negative,
                     "nb_neutral": global_data.nb_neutral
                 }
-            })
+                data["present"] = True
+            result.append(data)
+        logging.info("Result: {}".format(len(result)))
         left = 0
-        while result[left] is None:
+        while not result[left]["present"]:
             left += 1
         right = -1
-        while result[right] is None:
+        while not result[right]["present"]:
             right -= 1
         return result[left:right + 1]
 
@@ -298,7 +311,7 @@ class StatusAggregate:
 
     def validate_topic(self, topic_id):
         discussed = False
-        for interval in self.intervals.items():
+        for interval in self.intervals.values():
             if interval.discusses_topic(topic_id):
                 discussed = True
         if not discussed:

@@ -27,7 +27,7 @@ class Region:
 
     def get_parent(self):
         for region in all_regions_dict.values():
-            if region.id == self.parent_id:
+            if region.region_id == self.parent_id:
                 return region
         return None
 
@@ -80,7 +80,7 @@ def is_in_region(region, ancestor):
         return True
     if region is None:
         return False
-    if region.id == ancestor.id:
+    if region.region_id == ancestor.region_id:
         return True
     return is_in_region(region.get_parent(), ancestor)
 
@@ -96,7 +96,7 @@ def get_global_region():
 
 
 # Function that returns region name based on input data
-def get_location(longitude, latitude):
+def get_smallest_region_by_coordinates(longitude, latitude):
     point = Point(longitude, latitude)
     for region in get_all_regions():
         if region.has_shape() and region.contains_point(point):

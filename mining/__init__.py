@@ -80,7 +80,6 @@ def send_tweets():
         for line in f.readlines():
             if len(line.strip()) == 0:
                 continue
-            #print(line)
             try:
                 tweets.append(json.loads(line.strip()))
             except Exception as ex:
