@@ -26,10 +26,18 @@ def write_disk_tweets(tweets):
 
 
 def process_new_tweets(new_tweets):
-    # Convert new_tweets to Tweet objects
-    new_tweets = [Tweet.load_raw_tweet(tweet) for tweet in new_tweets]
     # Load tweets from disk
     disk_tweets = load_disk_tweets()
+    all_tweet_ids = {tweet.tweet_id for tweet in disk_tweets}
+    # Convert new_tweets to Tweet objects
+    new_tweets = []
+    for tweet_obj in new_tweets:
+        t = Tweet.load_raw_tweet(tweet_obj)
+        if t.tweet_id in all_tweet_ids:
+            continue
+        new_tweets.append(t)
+        all_tweet_ids.add(t.tweet_id)
+    # new_tweets = [Tweet.load_raw_tweet(tweet) for tweet in new_tweets]
     # Add tweets to set
     all_tweets = disk_tweets + new_tweets
 

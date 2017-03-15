@@ -77,6 +77,26 @@ class StdOutListener(StreamListener):
         print(status)
 
 
+def send_tweets():
+    tweets = []
+    with open(MINING_TWEET_JSON_FILE, 'r') as f:
+        for line in f.readlines():
+            if len(line.strip()) == 0:
+                continue
+            tweets.append(json.loads(line))
+    process_new_tweets(tweets)
+
+    # This runs the system command of transfering file to s3 bucket
+    proc = subprocess.Popen(["aws", "s3", "cp", MINING_TWEET_JSON_FILE, "s3://sentiment-bristol"],
+                            stdout=subprocess.PIPE, shell=True)
+    (out, err) = proc.communicate()
+    print("program output:", out)
+    # Remove file
+    proc = subprocess.Popen(["rm", MINING_TWEET_JSON_FILE], stdout=subprocess.PIPE, shell=True)
+    (out, err) = proc.communicate()
+    print("Removed JSON: {}".format(out))
+
+
 def stream_tweets_for_region(name, bounding_box, keys):
     global TrendingTopics
     print("Streaming tweets for {}".format(name))
@@ -96,12 +116,16 @@ def stream_tweets_for_region(name, bounding_box, keys):
     stream = Stream(auth, l)
 
     while True:
-        count = count + 1
+
+        # # send data to s3 every 5th hour
+        # # only one thread is required to write data to s3 bucket
+        if count % 5 == 0 and count != 0 and bounding_box[1] == 49.71:
+            send_tweets()
+
+        count += 1
         # This runs every an hour
-        print(
-            '\n ****************************************** Tweet Collection for next {0} hours started ************************************************************** \n'.format(
-                count / 2))
-        print(count)
+        print('\n************************* Tweet Collection for next {0} hours started *************************\n'
+              .format(count / 2))
 
         # for country in location:
         for country in woeidList:
@@ -117,27 +141,6 @@ def stream_tweets_for_region(name, bounding_box, keys):
             print(TrendingTopics, "\n")
             # Stream the tweets for given location coordinates
             stream.filter(locations=bounding_box)
-
-        # # send data to s3 every 5th hour
-        # # only one thread is required to write data to s3 bucket
-        if count % 5 == 0 and count != 0 and bounding_box[1] == 49.71:
-            tweets = []
-            with open(MINING_TWEET_JSON_FILE, 'r') as f:
-                for line in f.readlines():
-                    if len(line.strip()) == 0:
-                        continue
-                    tweets.append(json.loads(line))
-            process_new_tweets(tweets)
-
-            # This runs the system command of transfering file to s3 bucket
-            proc = subprocess.Popen(["aws", "s3", "cp", MINING_TWEET_JSON_FILE, "s3://sentiment-bristol"],
-                                    stdout=subprocess.PIPE, shell=True)
-            (out, err) = proc.communicate()
-            print("program output:", out)
-            # Remove file
-            proc = subprocess.Popen(["rm", MINING_TWEET_JSON_FILE], stdout=subprocess.PIPE, shell=True)
-            (out, err) = proc.communicate()
-            print("Removed JSON: {}".format(out))
 
 
 def start_mining():
