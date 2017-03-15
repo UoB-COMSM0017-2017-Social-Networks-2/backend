@@ -24,7 +24,7 @@ def store_credentials(user, token, secret):
 
 
 @app.route('/oauth_authorized')
-def oauth_authorized(resp):
+def oauth_authorized():
     next_url = request.args.get('next') or url_for('index')
     resp = twitter.authorized_response()
     if resp is None:
