@@ -120,7 +120,7 @@ def stream_tweets_for_region(name, bounding_box, keys):
 
         # # send data to s3 every 5th hour
         # # only one thread is required to write data to s3 bucket
-        if count % 5 == 0 and count != 0 and bounding_box[1] == 49.71:
+        if count % 5 == 0 and count != 0 and name == streaming_regions['name']:
             send_tweets()
 
         count += 1
