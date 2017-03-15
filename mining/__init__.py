@@ -141,8 +141,11 @@ def multiThreading(threadName):
                         app.config['VISHAL_ACCESS_TOKEN'], app.config['VISHAL_ACCESS_TOKEN_SECRET'], location5)
 
 
-if __name__ == '__main__':
+def start_mining():
+    _thread.start_new_thread(start_threads, ())
 
+
+def start_threads():
     try:
         _thread.start_new_thread(multiThreading, ("SouthWestEngland",))
         time.sleep(10)
@@ -160,3 +163,7 @@ if __name__ == '__main__':
 
     while 1:
         pass
+
+
+if __name__ == '__main__':
+    start_mining()

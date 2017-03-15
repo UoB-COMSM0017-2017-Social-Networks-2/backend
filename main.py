@@ -2,6 +2,8 @@ import logging
 
 from flask import Flask
 
+import mining
+
 app = Flask("SN2", template_folder='templates')
 app.config.from_pyfile('config.cfg')
 
@@ -27,6 +29,8 @@ from views import *
 
 
 def main():
+    logging.info("Starting mining")
+    mining.start_mining()
     logging.info("Starting Flask Application.")
     app.run(host=app.config['HOSTNAME'], port=int(app.config['PORT']))
     logging.info("Flask application stopped running.")
