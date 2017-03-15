@@ -11,6 +11,7 @@ from tweepy import Stream
 from tweepy.streaming import StreamListener
 
 from main import app
+from processing.update import process_new_tweets
 
 MINING_TWEET_JSON_FILE = 'output/tweetlocation.json'
 
@@ -117,14 +118,26 @@ def stream_tweets_for_region(name, bounding_box, keys):
             # Stream the tweets for given location coordinates
             stream.filter(locations=bounding_box)
 
-    # # send data to s3 every 5th hour
-    # # only one thread is required to write data to s3 bucket
-    if (count % 5 == 0 and count != 0 and location[1] == 49.71):
-        # This runs the system command of transfering file to s3 bucket
-        proc = subprocess.Popen(["aws", "s3", "cp", MINING_TWEET_LOCATION_FILE, "s3://sentiment-bristol"],
-                                stdout=subprocess.PIPE, shell=True)
-        (out, err) = proc.communicate()
-        print("program output:", out)
+        # # send data to s3 every 5th hour
+        # # only one thread is required to write data to s3 bucket
+        if count % 5 == 0 and count != 0 and bounding_box[1] == 49.71:
+            tweets = []
+            with open(MINING_TWEET_JSON_FILE, 'r') as f:
+                for line in f.readlines():
+                    if len(line.strip()) == 0:
+                        continue
+                    tweets.append(json.loads(line))
+            process_new_tweets(tweets)
+
+            # This runs the system command of transfering file to s3 bucket
+            proc = subprocess.Popen(["aws", "s3", "cp", MINING_TWEET_JSON_FILE, "s3://sentiment-bristol"],
+                                    stdout=subprocess.PIPE, shell=True)
+            (out, err) = proc.communicate()
+            print("program output:", out)
+            # Remove file
+            proc = subprocess.Popen(["rm", MINING_TWEET_JSON_FILE], stdout=subprocess.PIPE, shell=True)
+            (out, err) = proc.communicate()
+            print("Removed JSON: {}".format(out))
 
 
 def start_mining():
