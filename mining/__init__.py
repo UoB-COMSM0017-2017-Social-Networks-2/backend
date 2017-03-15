@@ -10,6 +10,7 @@ from tweepy import OAuthHandler
 from tweepy import Stream
 from tweepy.streaming import StreamListener
 
+import mining.authentication
 from main import app
 from processing.update import process_new_tweets
 
@@ -98,13 +99,13 @@ def send_tweets():
     print("Removed JSON: {}".format(out))
 
 
-def stream_tweets_for_region(name, bounding_box, keys):
+def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
     global TrendingTopics
     print("Streaming tweets for {}".format(name))
-    consumer_key = keys['CONSUMER_KEY']
-    consumer_secret = keys['CONSUMER_SECRET']
-    access_token = keys['ACCESS_TOKEN']
-    access_secret = keys['ACCESS_SECRET']
+    consumer_key = consumer_keys['CONSUMER_KEY']
+    consumer_secret = consumer_keys['CONSUMER_SECRET']
+    access_token = user_keys['ACCESS_TOKEN']
+    access_secret = user_keys['ACCESS_SECRET']
     # print("\n ########################################## Data mining for location : ", location, "started ########################################## \n")
     # print(startTime)
     count = 0
@@ -153,13 +154,23 @@ def start_mining():
 
 def start_threads():
     try:
-        min_length = min(len(streaming_regions), len(app.config['MINING_KEYS']))
+        consumer_keys = {
+            "CONSUMER_KEY": app.config['TWITTER_CONSUMER_KEY'],
+            "CONSUMER_SECRET": app.config['TWITTER_CONSUMER_SECRET']
+        }
+        mining_keys = mining.authentication.get_authentication_keys()
+        # min_length = min(len(streaming_regions), len(app.config['MINING_KEYS']))
+        min_length = min(len(streaming_regions), len(mining_keys))
         print("Found {} regions and key tuples".format(min_length))
-        for region, keys in zip(streaming_regions[:min_length], app.config['MINING_KEYS'][:min_length]):
-            _thread.start_new_thread(stream_tweets_for_region, (region['name'], region['bounding_box'], keys))
+        # for region, user_keys in zip(streaming_regions[:min_length], app.config['MINING_KEYS'][:min_length]):
+        for region, user_keys in zip(streaming_regions[:min_length], mining_keys[:min_length]):
+            _thread.start_new_thread(stream_tweets_for_region, (region['name'], region['bounding_box'], consumer_keys, {
+                "ACCESS_TOKEN": user_keys[0],
+                "ACCESS_SECRET": user_keys[1]
+            }))
             time.sleep(10)
-    except:
-        print("Error: unable to start the thread")
+    except Exception as ex:
+        print("Error: unable to start the thread: {}".format(ex))
 
     while 1:
         pass
