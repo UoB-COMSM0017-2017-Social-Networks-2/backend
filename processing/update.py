@@ -12,12 +12,15 @@ SHORT_TWEETS_FILE = "output/short_term_tweets.json"
 
 
 def load_disk_tweets():
-    with open(SHORT_TWEETS_FILE, 'w+') as f:
-        data = f.read()
-        if len(data) == 0:
-            return []
-        tweets = json.load(f)
-        return [Tweet(tweet) for tweet in tweets]
+    try:
+        with open(SHORT_TWEETS_FILE, 'r') as f:
+            data = f.read()
+            if len(data) == 0:
+                return []
+            tweets = json.load(f)
+            return [Tweet(tweet) for tweet in tweets]
+    except:
+        return []
 
 
 def write_disk_tweets(tweets):
