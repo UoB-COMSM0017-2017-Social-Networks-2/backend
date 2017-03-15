@@ -295,7 +295,10 @@ class StatusAggregate:
 
 
 def load_disk_status():
-    with open(STATUS_FILE, 'r') as f:
+    with open(STATUS_FILE, 'w+') as f:
+        data = f.read()
+        if len(data) == 0:
+            return StatusAggregate([])
         data = json.loads(f.read())
         return StatusAggregate(data)
 

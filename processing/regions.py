@@ -38,8 +38,8 @@ all_regions_dict = dict()
 def load_regions():
     global all_regions_dict
     all_regions_dict = dict()
-    with open('data/GBR_GeoJSON.json') as file:
-        gbr_data = json.load(file)
+    with open('data/GBR_GeoJSON.json', 'r', encoding="utf-8") as f:
+        gbr_data = json.load(f)
         regions_data = gbr_data["features"]
         for region_data in regions_data:
             properties = region_data["properties"]

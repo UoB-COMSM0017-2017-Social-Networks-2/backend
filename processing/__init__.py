@@ -13,6 +13,10 @@ MINING_ID_KEY = "id"
 MINING_TIMESTAMP_KEY = "timestamp_ms"
 
 
+def get_attribute_if_exists(d, key):
+    return d[key] if key in d else None
+
+
 def get_short_term_start():
     # TODO: check daylight saving time issues
     now = datetime.datetime.utcnow()
@@ -73,7 +77,7 @@ class Tweet:
         # TODO: compute region_id
         arr["region_id"] = None
         arr["timestamp"] = int(tweet_obj[MINING_TIMESTAMP_KEY]) // 1000
-        arr["topic"] = tweet_obj[MINING_TOPIC_KEY]
+        arr["topic"] = get_attribute_if_exists(tweet_obj, MINING_TOPIC_KEY)
         return Tweet(arr)
 
     def get_dict(self):
