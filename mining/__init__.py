@@ -66,7 +66,7 @@ class StdOutListener(StreamListener):
                 dataObj = json.dumps(data)
                 # Appending the data in tweetlondon.json file
                 with open(MINING_TWEET_JSON_FILE, 'a') as tf:
-                    tf.write(dataObj+"\n")
+                    tf.write(dataObj + "\n")
                     # prints on console
             return True
         else:
@@ -121,7 +121,10 @@ def stream_tweets_for_region(name, bounding_box, keys):
         # # send data to s3 every 5th hour
         # # only one thread is required to write data to s3 bucket
         if count % 5 == 0 and name == streaming_regions[0]['name']:
-            send_tweets()
+            try:
+                send_tweets()
+            except:
+                print("An error occurred sending tweets, keeping all data for now!")
 
         count += 1
         # This runs every an hour
