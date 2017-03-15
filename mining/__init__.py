@@ -15,38 +15,25 @@ from main import app
 # sample woeid code for countries USA, UK, Brazil, Canada, India
 # woeidList = ['23424977','23424975','23424768', '23424775', '23424848']
 woeidList = ['23424975']  # Used to fetch trending topics
-# sample location bounding box coordinates of south west england
-streaming_regions = [
-    {
-        "name": "South West England",
-        "bounding_box": [-5.71, 49.71, -0.62, 53.03]
-    },
-    # south east england
-    {
-        "name": "South East England",
-        "bounding_box": [-0.56, 50.77, 1.83, 53.07]
-    },
-    # Central UK
-    {
-        "name": "Central UK",
-        "bounding_box": [-5.38, 53.09, 0.53, 55.15]
-    },
-    # North UK
-    {
-        "name": "Northern UK",
-        "bounding_box": [-7.48, 55.21, -0.35, 61.05]
-    },
-    # Northern Ireland
-    {
-        "name": "Northern Ireland",
-        "bounding_box": [-10.5359, 53.2586, -5.2823, 55.2102]
-    },
-    # Southern Ireland
-    {
-        "name": "Southern Ireland",
-        "bounding_box": [-10.83, 51.22, -5.57, 53.27]
-    }
-]
+streaming_regions = [{
+    "name": "South West England",
+    "bounding_box": [-5.71, 49.71, -0.62, 53.03]
+}, {
+    "name": "South East England",
+    "bounding_box": [-0.56, 50.77, 1.83, 53.07]
+}, {
+    "name": "Central UK",
+    "bounding_box": [-5.38, 53.09, 0.53, 55.15]
+}, {
+    "name": "Northern UK",
+    "bounding_box": [-7.48, 55.21, -0.35, 61.05]
+}, {
+    "name": "Northern Ireland",
+    "bounding_box": [-10.5359, 53.2586, -5.2823, 55.2102]
+}, {
+    "name": "Southern Ireland",
+    "bounding_box": [-10.83, 51.22, -5.57, 53.27]
+}]
 
 TrendingTopics = []
 # count = 0;
