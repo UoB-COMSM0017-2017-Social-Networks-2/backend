@@ -132,6 +132,7 @@ def start_mining():
 def start_threads():
     try:
         min_length = min(len(streaming_regions), len(app.config['MINING_KEYS']))
+        print("Found {} regions and key tuples".format(min_length))
         for region, keys in zip(streaming_regions[:min_length], app.config['MINING_KEYS'][:min_length]):
             _thread.start_new_thread(stream_tweets_for_region, (region['name'], region['bounding_box'], keys))
             time.sleep(10)
