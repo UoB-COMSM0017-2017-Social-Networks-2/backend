@@ -12,6 +12,8 @@ from tweepy.streaming import StreamListener
 
 from main import app
 
+MINING_TWEET_LOCATION_FILE = 'output/tweetlocation.json'
+
 # sample woeid code for countries USA, UK, Brazil, Canada, India
 # woeidList = ['23424977','23424975','23424768', '23424775', '23424848']
 woeidList = ['23424975']  # Used to fetch trending topics
@@ -62,7 +64,7 @@ class StdOutListener(StreamListener):
                 # Convert the json object again to string
                 dataObj = json.dumps(data)
                 # Appending the data in tweetlondon.json file
-                with open('tweetlocation.json', 'a') as tf:
+                with open(MINING_TWEET_JSON_FILE, 'a') as tf:
                     tf.write(dataObj)
                     # prints on console
             return True
@@ -119,7 +121,7 @@ def stream_tweets_for_region(name, bounding_box, keys):
     # # only one thread is required to write data to s3 bucket
     if (count % 5 == 0 and count != 0 and location[1] == 49.71):
         # This runs the system command of transfering file to s3 bucket
-        proc = subprocess.Popen(["aws", "s3", "cp", "tweetlocation.json", "s3://sentiment-bristol"],
+        proc = subprocess.Popen(["aws", "s3", "cp", MINING_TWEET_LOCATION_FILE, "s3://sentiment-bristol"],
                                 stdout=subprocess.PIPE, shell=True)
         (out, err) = proc.communicate()
         print("program output:", out)
