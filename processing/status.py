@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 
 from processing import regions, get_short_term_start
 
@@ -8,7 +9,7 @@ STATUS_FILE = "output/status.json"
 
 def get_tweet_time(tweet):
     timestamp = tweet.timestamp
-    return datetime.datetime.fromtimestamp(timestamp=timestamp, tz=datetime.timezone.utc)
+    return datetime.datetime.fromtimestamp(timestamp=timestamp)
 
 
 def get_tweet_region(tweet):
@@ -45,7 +46,7 @@ class StatusInterval:
         topics = {tweet.topic for tweet in tweets}
         for topic in topics:
             topic_tweets = [tweet for tweet in tweets if tweet.topic == topic]
-            topic_data[topic] = StatusIntervalTopic(topic_tweets)
+            topic_data[topic] = StatusIntervalTopic.from_tweets(topic_tweets)
         return StatusInterval(topic_data)
 
     def get_dict(self):
@@ -95,7 +96,7 @@ class StatusIntervalTopic:
         all_regions = regions.get_all_regions()
         for region in all_regions:
             region_tweets = get_tweets_in_region(tweets, region)
-            location_data[region.woeid] = StatusIntervalTopicRegion(region_tweets)
+            location_data[region.region_id] = StatusIntervalTopicRegion.from_tweets(region_tweets)
         return StatusIntervalTopic(location_data)
 
     @classmethod
@@ -113,7 +114,7 @@ class StatusIntervalTopic:
 
     def get_global_data(self):
         global_region = regions.get_global_region()
-        return self.get_location_data(global_region.woeid)
+        return self.get_location_data(global_region.region_id)
 
     def get_location_data(self, location_id):
         return self.location_data[location_id]
@@ -187,34 +188,45 @@ class StatusIntervalTopicRegion:
 
 
 class StatusAggregate:
-    def __init__(self, intervals):
+    def __init__(self, intervals, short_term_start=None):
         # intervals: interval -> StatusInterval
         self.intervals = dict()
         for interval in intervals:
             self.intervals[interval] = StatusInterval(interval)
+        self.short_term_start = short_term_start
+        if short_term_start is None:
+            self.short_term_start = get_short_term_start()
 
     @classmethod
     def from_dict(cls, data):
         intervals = dict()
-        for interval_data in data:
-            intervals[(interval_data["start"], interval_data["end"])] = StatusInterval.from_dict(interval_data)
-        return StatusAggregate(intervals)
+        for interval_data in data['intervals']:
+            start_time = datetime.datetime.fromtimestamp(interval_data["start"])
+            end_time = datetime.datetime.fromtimestamp(interval_data["end"])
+            intervals[(start_time, end_time)] = StatusInterval.from_dict(interval_data)
+        short_term_start = None
+        if 'short_term_start' in data:
+            short_term_start = datetime.datetime.fromtimestamp(data['short_term_start'])
+        return StatusAggregate(intervals, short_term_start)
 
     def to_dict(self):
         result = []
         for interval in self.intervals:
-            interval_data = interval.get_dict()
-            interval_data["start"] = interval[0]
-            interval_data["end"] = interval[1]
+            interval_data = self.intervals[interval].get_dict()
+            interval_data["start"] = interval[0].timestamp()
+            interval_data["end"] = interval[1].timestamp()
             result.append(interval_data)
-        return result
+
+        return {
+            "intervals": result,
+            "short_term_start": self.short_term_start.timestamp()
+        }
 
     def add_interval(self, interval, tweets):
-        self.validate_interval(interval)
         if interval in self.intervals:
             raise Exception("Interval {} already present in StatusAggregate".format(interval))
         tweets = get_tweets_between(tweets, interval[0], interval[1])
-        self.intervals[interval] = StatusInterval(tweets)
+        self.intervals[interval] = StatusInterval.from_tweets(tweets)
 
     def get_long_intervals_data(self):
         short_start = get_short_term_start()
@@ -295,12 +307,13 @@ class StatusAggregate:
 
 
 def load_disk_status():
-    with open(STATUS_FILE, 'w+') as f:
-        data = f.read()
-        if len(data) == 0:
-            return StatusAggregate([])
-        data = json.loads(f.read())
-        return StatusAggregate(data)
+    try:
+        with open(STATUS_FILE, 'r') as f:
+            data = json.load(f)
+            return StatusAggregate.from_dict(data)
+    except Exception as ex:
+        logging.error("Couldn't load status from disk: {}".format(ex))
+        return StatusAggregate([])
 
 
 def write_disk_status(status):

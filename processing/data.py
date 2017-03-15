@@ -2,6 +2,7 @@
 Initial version loads data from files.
 Better version loads file content to memory and updates on changes.
 """
+import logging
 
 from processing.status import load_disk_status
 
@@ -9,6 +10,7 @@ from processing.status import load_disk_status
 def get_current_topics():
     status = load_disk_status()
     interval = status.get_last_interval()
+    logging.info("Last interval: {}".format(interval))
     return status.get_topics(interval)
 
 

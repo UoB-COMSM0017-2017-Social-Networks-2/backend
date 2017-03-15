@@ -116,10 +116,10 @@ def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
         # # send data to s3 every 5th hour
         # # only one thread is required to write data to s3 bucket
         if count % 5 == 0 and name == streaming_regions[0]['name']:
-            try:
-                send_tweets()
-            except:
-                print("An error occurred sending tweets, keeping all data for now!")
+            #try:
+            send_tweets()
+            #except Exception as ex:
+            #    print("An error occurred sending tweets, keeping all data for now! {}".format(ex))
 
         count += 1
         # This runs every an hour
