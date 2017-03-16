@@ -4,6 +4,7 @@ Older tweets that are passed to process_new_tweets are discarded.
 Newer tweets are taken into account.
 """
 import json
+import logging
 
 from processing import get_short_term_start, get_long_intervals_between, get_short_intervals, Tweet
 from processing.status import load_disk_status, StatusAggregate, write_disk_status, get_tweets_after
@@ -29,7 +30,7 @@ def write_disk_tweets(tweets):
 
 
 def process_new_tweets(new_tweets_original):
-    print("Processing new tweets!")
+    logging.info("Processing new tweets!")
     # Load tweets from disk
     disk_tweets = load_disk_tweets()
     all_tweet_ids = {tweet.tweet_id for tweet in disk_tweets}
@@ -66,4 +67,4 @@ def process_new_tweets(new_tweets_original):
     write_disk_tweets(recent_tweets)
     # Write categories to disk
     write_disk_status(new_status)
-    pass
+    logging.info("Finished processing new tweets")
