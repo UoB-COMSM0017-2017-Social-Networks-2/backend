@@ -244,7 +244,7 @@ class StatusAggregate:
 
     def get_long_intervals_data(self):
         short_start = get_short_term_start()
-        return [self.intervals[interval] for interval in self.intervals if interval[0] < short_start]
+        return {interval: self.intervals[interval] for interval in self.intervals if interval[0] < short_start}
 
     def get_topics(self, interval):
         self.validate_interval(interval)
