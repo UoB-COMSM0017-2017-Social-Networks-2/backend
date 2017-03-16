@@ -73,7 +73,6 @@ class StatusInterval:
             raise Exception("Invalid topic in this interval!")
 
     def get_topics(self):
-        print(self.topic_data)
         return list(self.topic_data.keys())
 
     def get_topic_data_per_region(self, topic_id):
@@ -101,8 +100,6 @@ class StatusIntervalTopic:
         all_regions = regions.get_all_regions()
         for region in all_regions:
             region_tweets = get_tweets_in_region(tweets, region)
-            if len(region_tweets) > 0:
-                print({tweet.region_id for tweet in region_tweets})
             location_data[region.region_id] = StatusIntervalTopicRegion.from_tweets(region_tweets)
         return StatusIntervalTopic(location_data)
 

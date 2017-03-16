@@ -40,7 +40,7 @@ def get_long_intervals_between(start, end):
         "LONG_INTERVAL_LENGTH must fit an integer number of times into a day"
     intervals = []
     start_day = start.date()
-    current_start = datetime.datetime.from_date(start_day)
+    current_start = datetime.datetime.combine(start_day, datetime.time())
     while current_start + LONG_INTERVAL_LENGTH <= end:
         intervals.append((current_start, current_start + LONG_INTERVAL_LENGTH))
         current_start += LONG_INTERVAL_LENGTH
