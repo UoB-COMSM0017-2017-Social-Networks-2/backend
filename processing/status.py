@@ -184,7 +184,6 @@ class StatusIntervalTopicRegion:
         return self.popularity
 
     def get_overall_sentiment(self):
-        logging.info("dict: {}".format(self.get_dict()))
         if self.nb_positive > max(self.nb_neutral, self.nb_negative):
             return 1
         if self.nb_negative > max(self.nb_neutral, self.nb_positive):
@@ -217,7 +216,6 @@ class StatusAggregate:
         short_term_start = None
         if 'short_term_start' in data:
             short_term_start = datetime.datetime.fromtimestamp(data['short_term_start'])
-        logging.info("Found {} intervals".format(len(interval_data)))
         return StatusAggregate(intervals, short_term_start)
 
     def get_intervals(self):
@@ -270,7 +268,6 @@ class StatusAggregate:
         self.validate_topic(topic_id)
         self.validate_location(location_id)
         result = []
-        logging.info("Intervals: {}".format(len(self.intervals)))
         for interval in self.intervals:
             interval_data = self.intervals[interval]
             data = {
@@ -293,7 +290,6 @@ class StatusAggregate:
                 }
                 data["present"] = True
             result.append(data)
-        logging.info("Result: {}".format(len(result)))
         left = 0
         while not result[left]["present"]:
             left += 1

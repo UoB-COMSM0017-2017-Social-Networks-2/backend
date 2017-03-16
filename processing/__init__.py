@@ -36,7 +36,7 @@ def get_short_term_start():
 
 
 def get_long_intervals_between(start, end):
-    assert (datetime.timedelta(days=1).seconds % LONG_INTERVAL_LENGTH.seconds == 0), \
+    assert (datetime.timedelta(days=1).total_seconds() % LONG_INTERVAL_LENGTH.total_seconds() == 0), \
         "LONG_INTERVAL_LENGTH must fit an integer number of times into a day"
     intervals = []
     start_day = start.date()
