@@ -16,6 +16,7 @@ from main import app
 from processing.update import process_new_tweets
 
 MINING_TWEET_JSON_FILE = 'output/tweetlocation.json'
+STORING_INTERVAL = app.config['STORING_INTERVAL'] if 'STORING_INTERVAL' in app.config else 60 * 10  # 10 minutes
 
 COUNTRY_ID = '23424975'  # UK
 streaming_regions = [{
@@ -63,7 +64,6 @@ MINUTES_PER_QUERY = 1
 QUERIES_PER_BATCH = 2
 
 
-# This is a basic listener that just prints received tweets to stdout.
 class StdOutListener(StreamListener):
     topics = []
 
@@ -76,7 +76,6 @@ class StdOutListener(StreamListener):
         # logging.debug("Topics: {}".format([x.topic_name for x in StdOutListener.topics]))
         for topic in StdOutListener.topics:
             if topic.tweet_is_about_topic(tweet):
-                # if topic in str(tweet):
                 print("Received relevant tweet ({}): {}".format(topic.topic_name, tweet))
                 data['TrendingTopic'] = topic.topic_name
                 with open(MINING_TWEET_JSON_FILE, 'a') as tf:
@@ -177,7 +176,7 @@ def master_mining_thread():
     while True:
         send_tweets()
         update_all_topics(static_topics, consumer_keys, mining_keys)
-        time.sleep(60 * 10)  # 10 minutes
+        time.sleep(STORING_INTERVAL)
 
 
 if __name__ == '__main__':
