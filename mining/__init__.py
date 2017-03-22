@@ -137,7 +137,7 @@ def start_region_threads(consumer_keys, mining_keys):
             "ACCESS_TOKEN": user_keys[0],
             "ACCESS_SECRET": user_keys[1]
         }))
-        time.sleep(60)
+        time.sleep(10)
 
 
 def get_static_topics():

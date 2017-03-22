@@ -24,7 +24,10 @@ def get_tweet_region_id(tweet_obj):
         return regions.get_global_region().region_id
     else:
         coordinates = coordinates["coordinates"]
-        return regions.get_smallest_region_by_coordinates(coordinates[0], coordinates[1]).region_id
+        region = regions.get_smallest_region_by_coordinates(coordinates[0], coordinates[1])
+        if region is None:
+            return None
+        return region.region_id
 
 
 def get_short_term_start():
