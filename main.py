@@ -6,7 +6,7 @@ import mining
 
 app = Flask("SN2", template_folder='templates')
 app.config.from_pyfile('config.cfg')
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 from flask_oauthlib.client import OAuth
 

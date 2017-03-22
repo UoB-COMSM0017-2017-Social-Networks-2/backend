@@ -1,0 +1,190 @@
+[
+  {
+    "name": "Trump",
+    "queries": [
+      "trump",
+      "@realDonaldTrump",
+      "@POTUS",
+      "muslimban",
+      "fakenews",
+      "#americafirst",
+      "#obamagate",
+      "#trumptrain",
+      "#lockherup"
+    ]
+  },
+  {
+    "name": "Russia",
+    "queries": [
+      "#russia",
+      "#putin",
+      "#syria",
+      "#moscow",
+      "#kabul",
+      "#nato",
+      "#afganistan",
+      "#isis",
+      "#ukraine",
+      "#madvlad"
+    ]
+  },
+  {
+    "name": "Technology",
+    "queries": [
+      "#ArtificialIntelligence",
+      "#machinelearning",
+      "#deeplearning",
+      "@DeepMindAI",
+      "#Xboxone",
+      "#Xbox360",
+      "@Xbox",
+      "#xbox",
+      "#ps4",
+      "#ps4pro",
+      "@Playstation",
+      "@PlayStationUK",
+      "#google",
+      "#elonmusk",
+      "#spacex",
+      "#robots",
+      "#ces",
+      "#gadgets",
+      "#robotics",
+      "#robots",
+      "#bigdata",
+      "#3dprinting",
+      "#data",
+      "#datascience",
+      "#tech"
+    ]
+  },
+  {
+    "name": "Sports",
+    "queries": [
+      "MOTD",
+      "matchoftheday",
+      "UEFA",
+      "#ChampionsLeague",
+      "@Arsenal",
+      "@realmadriden",
+      "ParisSaintGermain",
+      "#Barcelona",
+      "#FCBARS",
+      "@rugbyworldcup",
+      "@EnglandRugby",
+      "@bbcrugbyunion"
+    ]
+  },
+  {
+    "name": "NHS",
+    "queries": [
+      "#hospital",
+      "#nhs",
+      "SaveOurNHS",
+      "OurNHS",
+      "JuniorDoctors",
+      "HuntMustGo",
+      "LoveYourNHS",
+      "NHSCrisis"
+    ]
+  },
+  {
+    "name": "French Election",
+    "queries": [
+      "#FrenchPresidentelection",
+      "LePen",
+      "#Hollande",
+      "#frexit",
+      "#presidentielle2017",
+      "#fillon",
+      "#marine",
+      "#leaveeu",
+      "#macron",
+      "#frenchelection"
+    ]
+  },
+  {
+    "name": "British Politics",
+    "queries": [
+      "brexit",
+      "remain",
+      "eumigrants",
+      "eu",
+      "#article50",
+      "#leave",
+      "proeu",
+      "#farage",
+      "#houseoflods",
+      "#PMQs",
+      "#EUref",
+      "#theresa",
+      "#brexitbritain",
+      "#johnmajor"
+    ]
+  },
+  {
+    "name": "Television",
+    "queries": [
+      "#eastenders",
+      "#topgear",
+      "#taboo",
+      "#ssgb",
+      "#dragonsden",
+      "#broadchurch",
+      "#thevoice",
+      "#thewalkingdead",
+      "#TWD",
+      "#24",
+      "#24legacy",
+      "#houseofcards",
+      "#HOC",
+      "#saswhodareswins",
+      "#sas",
+      "#theonlywayisessex",
+      "#TOWIE",
+      "#firstdates",
+      "#thebigbangtheory",
+      "#TGGT",
+      "#hunted",
+      "#thehunted",
+      "#fiftyshades",
+      "#50shades",
+      "#christiangrey",
+      "#grey"
+    ]
+  },
+  {
+    "name": "Celebrities",
+    "queries": [
+      "#tomhardy",
+      "#katyperry",
+      "#justinbeaber",
+      "#taylorswift",
+      "#rihanna",
+      "#justintimberlake",
+      "#kimkardashian",
+      "#harrystyles",
+      "#adele",
+      "#kanye",
+      "#emmawatson",
+      "#coldplay",
+      "#charliesheen",
+      "#simoncowell",
+      "#dicaprio",
+      "#edsheeran"
+    ]
+  },
+  {
+    "name": "Events",
+    "queries": [
+      "stpatricksday",
+      "#boatrace",
+      "#cambridgeoxford",
+      "#londonmarathon",
+      "#londonmara",
+      "#masters",
+      "#grandnational",
+      "#aintree"
+    ]
+  }
+]

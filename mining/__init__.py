@@ -2,6 +2,7 @@
 import _thread
 import html
 import json
+import logging
 import subprocess
 import time
 
@@ -37,37 +38,50 @@ streaming_regions = [{
     "bounding_box": [-10.83, 51.22, -5.57, 53.27]
 }]
 
-TrendingTopics = []
-# count = 0;
-startTime = time.time()
 
+class Topic:
+    def __init__(self, topic_name, tags=None):
+        self.topic_name = topic_name
+        self.tags = tags
+        if tags is None:
+            self.tags = [topic_name]
+
+    def tweet_is_about_topic(self, text):
+        for tag in self.tags:
+            if tag in text:
+                return True
+        return False
+
+
+TrendingTopics = []
+StaticTopics = []
+startTime = time.time()
 
 # timeLimit = 60  # 1/2 hour limit
 
 MINUTES_PER_QUERY = 1
 QUERIES_PER_BATCH = 2
 
+
 # This is a basic listener that just prints received tweets to stdout.
 class StdOutListener(StreamListener):
+    topics = []
+
     # On every tweet arrival
     def on_data(self, data):
-        global startTime, TrendingTopics
-        if time.time() - startTime < 60 * MINUTES_PER_QUERY:
-            # Convert the string data to pyhton json object.
-            data = json.loads(html.unescape(data))
-            # Gives the content of the tweet.
-            tweet = data['text']
-            # If tweet content contains any of the trending topic.
-            for topic in TrendingTopics:
-                if topic in str(tweet):
-                    print("Received relevant tweet: {}".format(str(tweet)))
-                    data['TrendingTopic'] = topic
-                    with open(MINING_TWEET_JSON_FILE, 'a') as tf:
-                        tf.write(json.dumps(data)+'\n')
-            return True
-        else:
-            startTime = time.time()
-            return False
+        data = json.loads(html.unescape(data))
+        # Gives the content of the tweet.
+        tweet = str(data['text'])
+        # If tweet content contains any of the trending topic.
+        # logging.debug("Topics: {}".format([x.topic_name for x in StdOutListener.topics]))
+        for topic in StdOutListener.topics:
+            if topic.tweet_is_about_topic(tweet):
+                # if topic in str(tweet):
+                print("Received relevant tweet ({}): {}".format(topic.topic_name, tweet))
+                data['TrendingTopic'] = topic.topic_name
+                with open(MINING_TWEET_JSON_FILE, 'a') as tf:
+                    tf.write(json.dumps(data) + '\n')
+        return True
 
     def on_error(self, status):
         print("Received streaming error: {}".format(status))
@@ -99,76 +113,71 @@ def send_tweets():
 
 
 def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
-    global TrendingTopics
     print("Streaming tweets for {}".format(name))
     consumer_key = consumer_keys['CONSUMER_KEY']
     consumer_secret = consumer_keys['CONSUMER_SECRET']
     access_token = user_keys['ACCESS_TOKEN']
     access_secret = user_keys['ACCESS_SECRET']
-    # print("\n ########################################## Data mining for location : ", location, "started ########################################## \n")
-    # print(startTime)
-    count = 0
-    # This handles Twitter authetification and the connection to Twitter Streaming API
+    # This handles Twitter authentication and the connection to Twitter Streaming API
     l = StdOutListener()
     auth = OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_secret)
-
-    api = API(auth)
     stream = Stream(auth, l)
-
-    while True:
-
-        # # send data to s3 every 5th hour
-        # # only one thread is required to write data to s3 bucket
-        if count % QUERIES_PER_BATCH == 0 and name == streaming_regions[0]['name']:
-            #try:
-            send_tweets()
-            #except Exception as ex:
-            #    print("An error occurred sending tweets, keeping all data for now! {}".format(ex))
-
-        count += 1
-        # This runs every an hour
-        print('\n************************* Tweet Collection for next {0} hours started *************************\n'
-              .format(count / 2))
-
-        trends1 = api.trends_place(COUNTRY_ID)
-        data = trends1[0]
-        # grab the trends
-        trends = data['trends']
-        # grab the name from each trend
-        TrendingTopics = [trend['name'] for trend in trends[:10]]
-        # put all the names together with a ' ' separating them
-        print("Trending Topics: {}".format(TrendingTopics))
-        # Stream the tweets for given location coordinates
-        stream.filter(locations=bounding_box)
+    stream.filter(locations=bounding_box)
 
 
 def start_mining():
-    _thread.start_new_thread(start_threads, ())
+    _thread.start_new_thread(master_mining_thread, ())
 
 
-def start_threads():
-    try:
-        consumer_keys = {
-            "CONSUMER_KEY": app.config['TWITTER_CONSUMER_KEY'],
-            "CONSUMER_SECRET": app.config['TWITTER_CONSUMER_SECRET']
-        }
-        mining_keys = mining.authentication.get_authentication_keys()
-        # min_length = min(len(streaming_regions), len(app.config['MINING_KEYS']))
-        min_length = min(len(streaming_regions), len(mining_keys))
-        print("Found {} regions and key tuples".format(min_length))
-        # for region, user_keys in zip(streaming_regions[:min_length], app.config['MINING_KEYS'][:min_length]):
-        for region, user_keys in zip(streaming_regions[:min_length], mining_keys[:min_length]):
-            _thread.start_new_thread(stream_tweets_for_region, (region['name'], region['bounding_box'], consumer_keys, {
-                "ACCESS_TOKEN": user_keys[0],
-                "ACCESS_SECRET": user_keys[1]
-            }))
-            time.sleep(60)
-    except Exception as ex:
-        print("Error: unable to start the thread: {}".format(ex))
+def start_region_threads(consumer_keys, mining_keys):
+    min_length = min(len(streaming_regions), len(mining_keys))
+    print("Found {} regions and key tuples".format(min_length))
+    for region, user_keys in zip(streaming_regions[:min_length], mining_keys[:min_length]):
+        _thread.start_new_thread(stream_tweets_for_region, (region['name'], region['bounding_box'], consumer_keys, {
+            "ACCESS_TOKEN": user_keys[0],
+            "ACCESS_SECRET": user_keys[1]
+        }))
+        time.sleep(60)
 
-    while 1:
-        pass
+
+def get_static_topics():
+    with open('data/ads_topics.json', 'r') as staticTopicData:
+        d = json.load(staticTopicData)
+    return [Topic(x['name'], x['queries']) for x in d]
+
+
+def get_trending_topics(consumer_key, consumer_secret, access_token, access_secret):
+    auth = OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_secret)
+    api = API(auth)
+    api_trend_data = api.trends_place(COUNTRY_ID)
+    data = api_trend_data[0]
+    trends = data['trends']
+    return [Topic(trend['name']) for trend in trends[:10]]
+
+
+def update_all_topics(static_topics, consumer_keys, mining_keys):
+    trending_topics = get_trending_topics(consumer_keys['CONSUMER_KEY'], consumer_keys['CONSUMER_SECRET'],
+                                          mining_keys[0][0], mining_keys[0][1])
+    StdOutListener.topics = trending_topics + static_topics
+    logging.info("All topics are now: {}".format([x.topic_name for x in StdOutListener.topics]))
+
+
+def master_mining_thread():
+    consumer_keys = {
+        "CONSUMER_KEY": app.config['TWITTER_CONSUMER_KEY'],
+        "CONSUMER_SECRET": app.config['TWITTER_CONSUMER_SECRET']
+    }
+    static_topics = get_static_topics()
+    mining_keys = mining.authentication.get_authentication_keys()
+    logging.debug("Mining keys: {}".format(mining_keys))
+    update_all_topics(static_topics, consumer_keys, mining_keys)
+    start_region_threads(consumer_keys, mining_keys)
+    while True:
+        send_tweets()
+        update_all_topics(static_topics, consumer_keys, mining_keys)
+        time.sleep(60 * 10)  # 10 minutes
 
 
 if __name__ == '__main__':
