@@ -120,7 +120,7 @@ def get_topic_interval_data(topic_id, interval):
     :return: Local sentiment and popularity of topic in interval for each region as a CSV response.
     """
     topic_interval_data = data.get_topic_interval_data_per_region(topic_id, parse_interval_string(interval))
-    data_array = []
+    data_array = [["Region ID", "Popularity", "Average sentiment", "Overall sentiment"]]
     for record in topic_interval_data:
         data_array.append([
             record["region_id"], record["popularity"], record["average_sentiment"], record["overall_sentiment"]
@@ -136,7 +136,8 @@ def get_topic_interval_location_data(topic_id, interval, location_id):
     :param location_id:
     :return: Local sentiment and popularity of topic in interval for specific region as CSV response.
     """
-    topic_interval_location_data = data.get_topic_interval_location_data(topic_id, parse_interval_string(interval), location_id)
+    topic_interval_location_data = data.get_topic_interval_location_data(topic_id, parse_interval_string(interval),
+                                                                         location_id)
     return jsonify({
         "data": topic_interval_location_data
     })
