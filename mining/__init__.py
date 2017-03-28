@@ -98,17 +98,20 @@ def send_tweets():
             except Exception as ex:
                 print(ex)
                 print("error for tweet: {}".format(line))
-    process_new_tweets(tweets)
-
-    # This runs the system command of transfering file to s3 bucket
-    proc = subprocess.Popen(["aws", "s3", "cp", MINING_TWEET_JSON_FILE, "s3://sentiment-bristol"],
-                            stdout=subprocess.PIPE, shell=True)
-    (out, err) = proc.communicate()
-    print("program output:", out)
-    # Remove file
-    proc = subprocess.Popen(["rm", MINING_TWEET_JSON_FILE], stdout=subprocess.PIPE, shell=True)
-    (out, err) = proc.communicate()
-    print("Removed JSON: {}".format(out))
+    try:
+        process_new_tweets(tweets)
+        # This runs the system command of transfering file to s3 bucket
+        proc = subprocess.Popen(["aws", "s3", "cp", MINING_TWEET_JSON_FILE, "s3://sentiment-bristol"],
+                                stdout=subprocess.PIPE, shell=True)
+        (out, err) = proc.communicate()
+        print("program output:", out)
+        # Remove file
+        proc = subprocess.Popen(["rm", MINING_TWEET_JSON_FILE], stdout=subprocess.PIPE, shell=True)
+        (out, err) = proc.communicate()
+        print("Removed JSON: {}".format(out))
+    except Exception as ex:
+        logging.error("Processing tweets failed, continuing!")
+        logging.error(ex)
 
 
 def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
