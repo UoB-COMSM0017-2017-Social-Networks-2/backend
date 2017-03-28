@@ -7,8 +7,8 @@ import json
 import logging
 
 from processing import get_short_term_start, get_long_intervals_between, get_short_intervals, Tweet
-from processing.status import StatusAggregate, write_disk_status
-
+from processing.status import StatusAggregate, write_disk_status, load_disk_status
+from main import app
 SHORT_TWEETS_FILE = "output/short_term_tweets.json"
 
 
@@ -69,6 +69,7 @@ def update_statistics():
         new_status.add_interval(interval, all_tweets)
 
     write_disk_status(new_status)
+    app.status_structure = load_disk_status()
     logging.info("Updating statistics DONE")
 
 
