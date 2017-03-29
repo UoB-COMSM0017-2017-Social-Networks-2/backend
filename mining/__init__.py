@@ -121,11 +121,16 @@ def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
     access_token = user_keys['ACCESS_TOKEN']
     access_secret = user_keys['ACCESS_SECRET']
     # This handles Twitter authentication and the connection to Twitter Streaming API
-    l = StdOutListener()
-    auth = OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_secret)
-    stream = Stream(auth, l)
-    stream.filter(locations=bounding_box)
+    while True:
+        try:
+            l = StdOutListener()
+            auth = OAuthHandler(consumer_key, consumer_secret)
+            auth.set_access_token(access_token, access_secret)
+            stream = Stream(auth, l)
+            stream.filter(locations=bounding_box)
+        except:
+            logging.error("Need to restart for {}".format(name))
+
 
 
 def start_mining():
