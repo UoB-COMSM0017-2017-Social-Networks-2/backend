@@ -6,9 +6,10 @@ Newer tweets are taken into account.
 import json
 import logging
 
+from main import app
 from processing import get_short_term_start, get_long_intervals_between, get_short_intervals, Tweet
 from processing.status import StatusAggregate, write_disk_status, load_disk_status
-from main import app
+
 SHORT_TWEETS_FILE = "output/short_term_tweets.json"
 
 
@@ -37,6 +38,16 @@ def get_stored_tweets():
         with open(ALL_STRIPPED_TWEETS_FILE, "r") as f:
             tweets = json.load(f)
             return [Tweet.load_stripped_tweet(tweet) for tweet in tweets]
+    except json.JSONDecodeError as err:
+        try:
+            with open(ALL_STRIPPED_TWEETS_FILE, "r") as f:
+                tweets = []
+                for l in f.readlines():
+                    tweets.append(Tweet.load_stripped_tweet(json.loads(l)))
+                return tweets
+        except json.JSONDecodeError as err:
+            logging.error("{} not readable".format(ALL_STRIPPED_TWEETS_FILE))
+            return []
     except IOError as err:
         logging.error("{} not found: no stripped tweets loaded!".format(ALL_STRIPPED_TWEETS_FILE))
         return []
@@ -45,6 +56,7 @@ def get_stored_tweets():
 def store_new_tweets(new_tweets_original):
     logging.info("Storing new tweets")
     all_tweets = get_stored_tweets()
+    logging.info("Got new tweets")
     all_tweet_ids = {tweet.tweet_id for tweet in all_tweets}
     for tweet_obj in new_tweets_original:
         t = Tweet.load_raw_tweet(tweet_obj)
@@ -53,7 +65,9 @@ def store_new_tweets(new_tweets_original):
         all_tweets.append(t)
         all_tweet_ids.add(t.tweet_id)
     with open(ALL_STRIPPED_TWEETS_FILE, "w") as f:
-        json.dump([tweet.get_full_dict() for tweet in all_tweets], f)
+        for tweet in all_tweets:
+            f.write(json.dumps(tweet.get_full_dict()) + "\n")
+            # json.dump([tweet.get_full_dict() for tweet in all_tweets], f)
     logging.info("Storing new tweets DONE")
 
 
