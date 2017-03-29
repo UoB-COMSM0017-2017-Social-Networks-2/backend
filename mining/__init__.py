@@ -71,7 +71,11 @@ class StdOutListener(StreamListener):
     def on_data(self, data):
         data = json.loads(html.unescape(data))
         # Gives the content of the tweet.
-        tweet = str(data['text'])
+        tweet = str(data['text']) if 'text' in data else None
+        if tweet is None:
+            logging.error("Found empty tweet: {}".format(json.dumps(data)))
+            return True
+
         # If tweet content contains any of the trending topic.
         # logging.debug("Topics: {}".format([x.topic_name for x in StdOutListener.topics]))
         for topic in StdOutListener.topics:
@@ -130,7 +134,6 @@ def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
             stream.filter(locations=bounding_box)
         except:
             logging.error("Need to restart for {}".format(name))
-
 
 
 def start_mining():
