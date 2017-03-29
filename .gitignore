@@ -148,3 +148,4 @@ fabric.properties
 
 config.cfg
 output/*
+data/GBR_GeoJSON.json
