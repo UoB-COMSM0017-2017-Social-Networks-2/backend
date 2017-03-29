@@ -105,7 +105,7 @@ def get_interval_topics_details(interval):
     :return: Popularity and overall sentiment of all topics in interval as a CSV response.
     """
     topics_details = data.get_interval_topics_details(parse_interval_string(interval))
-    data_array = [("TOPIC", "TOPIC", "Popularity", "Overall sentiment", "Positive ratio", "Average sentiment")] + \
+    data_array = [("TOPIC", "TOPIC", "Popularity", "Overall_sentiment", "Positive_ratio", "Average_sentiment")] + \
                  [(topic["topic"], topic["topic"], topic["nb_tweets"], topic["overall_sentiment"],
                    topic["positive_ratio"], topic["average_sentiment"])
                   for topic in topics_details]
@@ -120,7 +120,7 @@ def get_topic_interval_data(topic_id, interval):
     :return: Local sentiment and popularity of topic in interval for each region as a CSV response.
     """
     topic_interval_data = data.get_topic_interval_data_per_region(topic_id, parse_interval_string(interval))
-    data_array = [["Region ID", "Popularity", "Average sentiment", "Overall sentiment"]]
+    data_array = [["Region ID", "Popularity", "Average_sentiment", "Overall_sentiment"]]
     for record in topic_interval_data:
         data_array.append([
             record["region_id"], record["popularity"], record["average_sentiment"], record["overall_sentiment"]
