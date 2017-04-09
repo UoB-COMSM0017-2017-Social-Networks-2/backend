@@ -3,19 +3,9 @@ Initial version loads data from files.
 Better version loads file content to memory and updates on changes.
 """
 
-import logging
-
-import processing.status
-from main import app
 from processing import db, get_last_interval, get_short_intervals, get_long_intervals_between, get_short_term_start, \
     Tweet
 from processing import regions
-
-
-def load_status():
-    if not hasattr(app, 'status_structure'):
-        app.status_structure = processing.status.load_disk_status()
-    return app.status_structure
 
 
 def get_interval_filter(interval):
