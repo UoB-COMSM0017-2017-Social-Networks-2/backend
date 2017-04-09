@@ -85,14 +85,19 @@ def get_topic_location_evolution(topic_id, location_id):
     neg_lines = []
     neut_lines = []
     for interval in topic_evolution:
-        timestamp = (interval["interval_start"] +
-                     (interval["interval_end"] - interval["interval_start"]) / 2)
-        pos_lines.append(
-            ["POS", interval["sentiment_distribution"]["nb_positive"], timestamp])
-        neut_lines.append(
-            ["NEUT", interval["sentiment_distribution"]["nb_neutral"], timestamp])
-        neg_lines.append(
-            ["NEG", interval["sentiment_distribution"]["nb_negative"], timestamp])
+        timestamp = interval[0] + (interval[1] - interval[1]) / 2
+        # timestamp = (interval["interval_start"] +
+        #             (interval["interval_end"] - interval["interval_start"]) / 2)
+        # pos_lines.append(
+        #    ["POS", interval["sentiment_distribution"]["nb_positive"], timestamp])
+        summary = topic_evolution[interval]
+        pos_lines.append(["POS", summary.nb_positive, timestamp])
+        neut_lines.append(["NEUT", summary.nb_neutral, timestamp])
+        neg_lines.append(["NEG", summary.nb_negative, timestamp])
+        # neut_lines.append(
+        #    ["NEUT", interval["sentiment_distribution"]["nb_neutral"], timestamp])
+        # neg_lines.append(
+        #    ["NEG", interval["sentiment_distribution"]["nb_negative"], timestamp])
     data_array = pos_lines + neut_lines + neg_lines
     return output_csv_file("evolution.csv", data_array)
 
@@ -106,9 +111,9 @@ def get_interval_topics_details(interval):
     """
     topics_details = data.get_interval_topics_details(parse_interval_string(interval))
     data_array = [("TOPIC", "TOPIC", "Popularity", "Overall_sentiment", "Positive_ratio", "Average_sentiment")] + \
-                 [(topic["topic"], topic["topic"], topic["nb_tweets"], topic["overall_sentiment"],
-                   topic["positive_ratio"], topic["average_sentiment"])
-                  for topic in topics_details]
+                 [(topic, topic, summary.popularity, summary.get_overall_sentiment(),
+                   summary.get_positive_ratio(), summary.average_sentiment)
+                  for topic, summary in topics_details.items()]
     return output_csv_file("data.csv", data_array)
 
 
@@ -121,9 +126,9 @@ def get_topic_interval_data(topic_id, interval):
     """
     topic_interval_data = data.get_topic_interval_data_per_region(topic_id, parse_interval_string(interval))
     data_array = [["Region ID", "Popularity", "Average_sentiment", "Overall_sentiment"]]
-    for record in topic_interval_data:
+    for region, summary in topic_interval_data.items():
         data_array.append([
-            record["region_id"], record["popularity"], record["average_sentiment"], record["overall_sentiment"]
+            region, summary.popularity, summary.average_sentiment, summary.get_overall_sentiment()
         ])
     return output_csv_file("{}.csv".format(interval), data_array)
 
@@ -136,8 +141,8 @@ def get_topic_interval_location_data(topic_id, interval, location_id):
     :param location_id:
     :return: Local sentiment and popularity of topic in interval for specific region as CSV response.
     """
-    topic_interval_location_data = data.get_topic_interval_location_data(topic_id, parse_interval_string(interval),
+    summary = data.get_topic_interval_location_data(topic_id, parse_interval_string(interval),
                                                                          location_id)
     return jsonify({
-        "data": topic_interval_location_data
+        "data": summary.get_dict()
     })

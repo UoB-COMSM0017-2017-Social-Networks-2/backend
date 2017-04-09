@@ -102,3 +102,11 @@ def get_smallest_region_by_coordinates(longitude, latitude):
         if region.has_shape() and region.contains_point(point):
             return region
     return None
+
+
+def get_all_sub_region_ids(parent_region_id):
+    regions = set()
+    for region in get_all_regions():
+        if is_in_region(region, get_region_by_id(parent_region_id)):
+            regions.add(region.region_id)
+    return regions

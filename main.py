@@ -31,6 +31,8 @@ from views import *
 
 
 def main():
+    logging.info("Populate MongoDB")
+    mining.send_all_old_tweets()
     logging.info("Starting mining")
     mining.start_mining()
     logging.info("Starting Flask Application.")

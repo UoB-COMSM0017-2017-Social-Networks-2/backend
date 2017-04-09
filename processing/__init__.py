@@ -17,6 +17,13 @@ MINING_PLACE_KEY = "place"
 MINING_USER_KEY = "user"
 MINING_USER_LOCATION_KEY = "location"
 
+from pymongo import MongoClient
+
+from main import app
+
+mongo = MongoClient(app.config['MONGO_HOST'], app.config['MONGO_PORT'])
+db = mongo.database
+
 
 def get_attribute_if_exists(d, key):
     return d[key] if key in d else None
@@ -62,6 +69,10 @@ def get_short_intervals():
         intervals.append((current_start, current_start + SHORT_INTERVAL_LENGTH))
         current_start += SHORT_INTERVAL_LENGTH
     return intervals
+
+
+def get_last_interval():
+    return get_short_intervals()[-1]
 
 
 class Tweet:
