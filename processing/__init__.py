@@ -24,6 +24,8 @@ from main import app
 mongo = MongoClient(app.config['MONGO_HOST'], app.config['MONGO_PORT'])
 db = mongo.database
 
+db.tweets.create_index("tweet_id")
+
 
 def get_attribute_if_exists(d, key):
     return d[key] if key in d else None

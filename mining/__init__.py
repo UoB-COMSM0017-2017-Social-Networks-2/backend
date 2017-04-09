@@ -93,7 +93,7 @@ class StdOutListener(StreamListener):
 
 def send_tweets(tweets_file=MINING_TWEET_JSON_FILE, move_old=False):
     logging.info("SENDING TWEETS!")
-    tweets = []
+    #tweets = []
 
     try:
         with open(tweets_file, 'r') as f:
@@ -101,11 +101,13 @@ def send_tweets(tweets_file=MINING_TWEET_JSON_FILE, move_old=False):
                 if len(line.strip()) == 0:
                     continue
                 try:
-                    tweets.append(json.loads(line.strip()))
+                    # tweets.append(json.loads(line.strip()))
+                    tweet = json.loads(line.strip())
+                    process_new_tweets([tweet])
                 except Exception as ex:
                     logging.error(ex)
                     logging.error("error for tweet: {}".format(line))
-            process_new_tweets(tweets)
+                    # process_new_tweets(tweets)
         # This runs the system command of transfering file to s3 bucket
         # proc = subprocess.Popen(["aws", "s3", "cp", tweets_file, "s3://sentiment-bristol"],
         #                        stdout=subprocess.PIPE, shell=True)
@@ -140,10 +142,17 @@ def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
             logging.error("Need to restart for {}".format(name))
 
 
-def send_all_old_tweets():
+def send_all_old_tweets_thread():
+    logging.info("Start storing old tweets")
     tweet_files = glob.glob(MINING_TWEET_JSON_FILE + "_*")
     for tweet_filename in tweet_files:
-        send_tweets(tweet_filename)
+        send_tweets(tweet_filename, move_old=False)
+    logging.info("Done storing old tweets")
+    logging.info("MongoDB population DONE")
+
+
+def send_all_old_tweets():
+    _thread.start_new_thread(send_all_old_tweets_thread, ())
 
 
 def start_mining():
