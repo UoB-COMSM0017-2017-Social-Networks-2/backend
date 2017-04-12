@@ -125,7 +125,7 @@ def get_topic_interval_data(topic_id, interval):
     :return: Local sentiment and popularity of topic in interval for each region as a CSV response.
     """
     topic_interval_data = data.get_topic_interval_data_per_region(topic_id, parse_interval_string(interval))
-    data_array = [["Region ID", "Popularity", "Average_sentiment", "Overall_sentiment"]]
+    data_array = [["Region_ID", "Popularity", "Average_sentiment", "Overall_sentiment"]]
     for region, summary in topic_interval_data.items():
         data_array.append([
             region, summary.popularity, summary.average_sentiment, summary.get_overall_sentiment()
