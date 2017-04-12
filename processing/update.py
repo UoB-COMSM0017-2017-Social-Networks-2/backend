@@ -20,13 +20,9 @@ def store_new_tweets(new_tweets_original):
     for tweet_obj in new_tweets_original:
         tweet = Tweet.load_raw_tweet(tweet_obj)
         if get_tweet_by_twitter_id(tweet.tweet_id) is not None:
-            # logging.warning("Tweet {} already present".format(tweet.tweet_id))
             continue
         insert_tweet(tweet)
-        # logging.info("Storing new tweets DONE")
 
 
 def process_new_tweets(new_tweets_original):
-    # logging.info("Processing new tweets!")
     store_new_tweets(new_tweets_original)
-    # logging.info("Processing new tweets DONE")
