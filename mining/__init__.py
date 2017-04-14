@@ -50,7 +50,7 @@ class Topic:
 
     def tweet_is_about_topic(self, text):
         for tag in self.tags:
-            if tag in text:
+            if tag in text.lower().split():
                 return True
         return False
 
