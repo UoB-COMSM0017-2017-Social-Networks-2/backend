@@ -1,10 +1,307 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
+  <title>UK Twitter Visualisation</title>
+  <!-- Load Bootstrap -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <!-- Load D3 -->
+  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="http://d3js.org/queue.v1.min.js"></script>
+  <script src="http://d3js.org/topojson.v1.min.js"></script>
+
+  <link rel = "stylesheet" href = "static/css/bootstrapmap.css" />
+  <link rel = "stylesheet" href = "static/css/d3map.css" />
+  <link rel = "stylesheet" href = "static/css/sitecss.css" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <!-- ------- -->
+  <!-- BUBBLES -->
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- CSS concatenated and minified via ant build script-->
+  <link rel="stylesheet" href="static/css/reset.css">
+  <link rel="stylesheet" href="static/css/bootstrap.min.css">
+  <link rel="stylesheet" href="static/css/style.css">
+  <!-- end CSS-->
+
+  <script src="static/js/libs/modernizr-2.0.6.min.js"></script>
+  <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script> 
+</head>
+
+<body>
+<!-- Navigation bar -->
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <a class="navbar-brand" href="#">Logo</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+        <li class="active"><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Projects</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Map visualisation -->
+<div class="container visualisation">
+  <script type="text/javascript">
+
+
+  var width = screen.width;
+  height = screen.height * 0.75;
+
+  // Create an SVG element in which the map/everything will go - select the body and append an svg to it
+  var svg = d3.select("body")
+    .append("svg")
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("viewBox", "0 0 " + width + " " + height)
+    .classed("svg-content-responsive", true) // Responsive to window sizing
+    .on("click", stopped, true);
+      
+    active = d3.select(null);
+    
+  // Create a rectangle element behind the map to allow resetting the map
+  svg.append("rect")
+    .attr("class", "background")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .on("click", reset);
+
+  var map_scale = 2800;
+  if(screen.width < 600){
+    map_scale = 2300;
+  }
+  // Create the albers projection (to center the UK map correctly)
+  var albersProjection = d3.geo.albers()
+    .center([0, 55.4])
+    .rotate([4.4, 0])
+    .parallels([50, 60])
+    .scale(map_scale)
+    .translate([width / 2, height / 2]);
+    
+  // Create a function geoPath - it takes a GeoJSON feature and returns SVG path data (SVG path = a shape)
+  var geoPath = d3.geo.path()
+    .projection(albersProjection);
+
+  // Create a group to handle all svg elements simultaneously
+  var g = svg.append( "g" );
+ 
+    
+  // Create a function which returns a colour based on sentiment values
+  var color = d3.scale.threshold()
+    .domain([-0.66, -0.33, 0.33, 0.66, 1])
+    .range(["#FF0033", "#FF6000", "#FFFF00", "#B0FF00", "#80FF00", "#00FF00"]);
+    
+  // Queue allows handling of multiple files within the same function ("ready" - below)
+  queue()
+    .defer(d3.json, "static/mapdata/GBR_adm2geo.json")
+    .defer(d3.csv, "static/mapdata/MapData1.csv")
+    .await(ready);
+
+  // Display the map  
+  function ready(error, UK_json, MapData) {
+    if (error) throw error;
+    
+    var sentimentById = {}; // Array stores sentiment data
+    MapData.forEach(function(d) { sentimentById[d.id] = +d.sentiment; }); // Bind the sentiment data from MapData to sentimentById
+
+    g.selectAll( "path" )   // Select all SVG path elements - since the elements don't exist yet, they are created on the fly.
+    .data( UK_json.features ) // Binds the geoJSON data to the page elements 
+    .enter()          // Creates a new element
+    .append( "path" )
+    .attr( "d", geoPath )   // For SVGs - d defines the coordinates of a path. geoPath is a function which returns an SVG path
+    .attr("class", "feature") // For CSS click and mouseover styling
+    .attr("fill", function(d,i) { return color(sentimentById[i+1]); })  // Paint region (cf color function)
+    .on("click", clicked)   // Zoom on click (cf clicked function)
+    .on("mouseover", function(d,i){return tooltip.style("visibility", "visible"), 
+                     tooltip.text(UK_json.features[i].properties.NAME_2 + ": " + sentimentById[i+1]);}) // Show region tooltip 
+    .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");}) // Position of the tooltip
+    .on("mouseout", function(){return tooltip.style("visibility", "hidden");}); // Hide tooltip
+  };
+  
+  // button selection
+  d3.selectAll(".btn-default").on("click", function() {
+    console.log(this.id)
+    console.log("hello")
+    d3.csv("static/mapdata/MapData2.csv", function(error, MapData) {
+      if (error) throw error;
+    
+      var sentimentById = {}; // Array stores sentiment data
+      MapData.forEach(function(d) { sentimentById[d.id] = +d.sentiment; }); // Bind the sentiment data from MapData to sentimentById
+      
+      g.selectAll( "path" )
+      .attr("fill", function(d,i) { return color(sentimentById[i+1]); });  // Paint region (cf color function)
+    });
+  });
+
+  
+  // Add zoom functionality
+  var zoom = d3.behavior.zoom()
+    .translate([0, 0])
+    .scale(1)
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed);  
+
+  svg
+    .call(zoom) // delete this line to disable free zooming
+    .call(zoom.event);
+
+  // Zoom on click
+  function clicked(d) {
+    if (active.node() === this) return reset();
+    active.classed("active", false);
+    active = d3.select(this).classed("active", true);
+
+    var bounds = geoPath.bounds(d),
+      dx = bounds[1][0] - bounds[0][0],
+      dy = bounds[1][1] - bounds[0][1],
+      x = (bounds[0][0] + bounds[1][0]) / 2,
+      y = (bounds[0][1] + bounds[1][1]) / 2,
+      scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
+      translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+    svg.transition()
+      .duration(750)
+      .call(zoom.translate(translate).scale(scale).event)
+  }
+  
+  // Zoomed function
+  function zoomed() {
+    g.style("stroke-width", 1.5 / d3.event.scale + "px");
+    g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+  }
+  
+  // To reset the map to fullscreen
+  function reset() {
+    active.classed("active", false);
+    active = d3.select(null);
+
+    svg.transition()
+      .duration(750)
+      .call(zoom.translate([0, 0]).scale(1).event);
+  }
+  
+  // If the drag behavior prevents the default click,
+  // also stop propagation so we don’t click-to-zoom.
+  function stopped() {
+    if (d3.event.defaultPrevented) d3.event.stopPropagation();
+  }
+
+      // On mouseover tooltip
+      var tooltip = d3.select("body")
+        .append("div")
+        .style("position", "absolute")
+        .style("z-index", "10")
+        .style("visibility", "hidden");
+  
+  // Update Map data
+  var data_id = 1;
+  function updateMap(){
+      topic_id = decodeURIComponent(location.hash.substring(1)).trim();
+      interval_id = decodeURIComponent(location.search).substring(1);
+      topic_id = topic_id.replace("#", "%23");
+      console.log(topic_id);
+      console.log(interval_id);
+      mapdata_url = "/topic/"+topic_id+"/interval/"+interval_id+".csv"
+      
+      d3.csv(mapdata_url, function(error, MapData) {
+        if (error) throw error;
+      
+        var sentimentById = {}; // Array stores sentiment data
+        MapData.forEach(function(d) { sentimentById[d.Region_ID.substring(2)] = +d.Average_sentiment; }); // Bind the sentiment data from MapData to sentimentById
+        
+        g.selectAll( "path" )
+        .attr("fill", function(d,i) { return color(sentimentById[i+1]); });  // Paint region (cf color function)
+      });
+  };
+  
+  $(window).on('hashchange', updateMap)
+  
+  </script>
+</div>
+
+  <div id="container" class="container overlay">
+    <div id="main" role="main">
+      <div id="vis"></div>
+      <div id="status"></div>
+      <div id="controls">
+        <h3>Jitter</h3>
+        <form id="jitter" oninput="output.value = jitter_input.value * 3600" >
+          <input id="jitter_input" type="range" min="0" max="400" value="100" style="width:240px;">
+          <output name="output" for="input">0.5</output>
+        </form>
+        <form id="time" oninput="output.value = time_input.value * 3600" >
+          <input id="time_input" type="range" min="0" max="0" style="width:240px;">
+          <output id="time_output" name="output" for="input">22</output> March 2017
+        </form>          
+      </div>
+    </div>
+  </div> <!--! end of #container -->
+  
+  <script>
+    var minval = 0;
+    var initFinished;
+    d3.json("intervals.json", function(d){
+    /*
+      for (j = 0; j < d.intervals.length -1; j++){
+        (function(j){
+          d3.csv("topics/interval/"+d.intervals[j]+"/data.csv", function(data){
+            if (data[0] == undefined){
+              minval = j;
+            }
+            console.log(minval);
+          });
+        })(j);
+      }
+    */
+    console.log(d.intervals.length)
+      d3.select("#time_input")
+      .attr("min", d.intervals[177].split("-").shift() / 3600)
+      .attr("max", d.intervals[d.intervals.length - 1].split("-").shift() / 3600);
+      console.log("mival:",minval);
+    });
+  </script>
+
+  <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script> -->
+  <script>window.jQuery || document.write('<script src="static/js/libs/jquery-1.7.2.min.js"><\/script>')</script>
+
+
+  <script defer src="static/js/plugins.js"></script>
+  <script src="static/js/libs/coffee-script.js"></script>
+  <script type="text/coffeescript" src="static/coffee/vis.coffee"></script>
+  <script type="text/javascript">
+  </script>
+
+
+  <!--[if lt IE 7 ]>
+    <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+    <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
+  <![endif]-->
+  
 </body>
 </html>
