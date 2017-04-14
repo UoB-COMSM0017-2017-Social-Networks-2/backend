@@ -1,0 +1,25 @@
+TOPIC,TOPIC,Popularity,Overall sentiment,Positive ratio,Average sentiment
+Death Note,Death Note,4,0,0,-0.5425
+Kay Burley,Kay Burley,12,0,0,-0.002799999999999997
+Police Officer,Police Officer,2,0,0,0.04820000000000002
+#BrookSpence,#BrookSpence,2,0,0,0.2842
+Television,Television,2,0,0,0.0
+Events,Events,1,0,0,0.0
+French Election,French Election,2,0,0,0.0
+Brussels,Brussels,39,0,0.0,-0.46153846153846145
+Westminster,Westminster,730,0,0.17307692307692307,-0.18797630136986299
+#Westminster,#Westminster,290,0,0.13333333333333333,-0.18922551724137934
+#BreakingNews,#BreakingNews,1,0,0,-0.2896
+Russia,Russia,1,0,0,0.2263
+Tommy Robinson,Tommy Robinson,24,0,0.0,-0.27214166666666667
+Technology,Technology,6,0,0,0.3401333333333334
+#PrayForLondon,#PrayForLondon,244,0,0.3684210526315789,-0.0903241803278689
+British Politics,British Politics,352,0,0.5714285714285714,0.054074147727272696
+#worldwaterday,#worldwaterday,6,0,0,0.16553333333333334
+House of Commons,House of Commons,4,0,0,0.0
+Sports,Sports,3,0,0,0.5832
+#PMQs,#PMQs,5,0,0,-0.2667
+#WeAreNotAfraid,#WeAreNotAfraid,14,0,0.0,-0.13897142857142858
+Trump,Trump,43,0,1.0,-0.0691372093023256
+Tobias Ellwood,Tobias Ellwood,11,0,1.0,0.20422727272727273
+NHS,NHS,1,0,0,0.4771
