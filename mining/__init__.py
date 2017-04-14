@@ -122,6 +122,9 @@ def send_tweets(tweets_file=MINING_TWEET_JSON_FILE, move_old=False):
     except Exception as ex:
         logging.error("Processing tweets failed, continuing!")
         logging.error(ex)
+    except IOError as err:
+        logging.error("No {} file, continuing!".format(MINING_TWEET_JSON_FILE))
+
 
 
 def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
