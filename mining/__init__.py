@@ -120,10 +120,8 @@ def send_tweets(tweets_file=MINING_TWEET_JSON_FILE, move_old=False):
             # (out, err) = proc.communicate()
             # print("Removed JSON: {}".format(out))
     except Exception as ex:
-        logging.error("Processing tweets failed, continuing!")
-        logging.error(ex)
-    except IOError as err:
-        logging.error("No {} file, continuing!".format(MINING_TWEET_JSON_FILE))
+        logging.warning("Processing tweets failed, continuing!")
+        logging.warning(ex)
 
 
 
