@@ -1,4 +1,5 @@
 import logging
+import os
 
 from flask import Flask
 
@@ -32,7 +33,8 @@ from views import *
 
 def main():
     logging.info("Populate MongoDB")
-    mining.send_all_old_tweets()
+    if 'SEND_OLD_TWEETS' not in os.environ or os.environ['SEND_OLD_TWEETS'] != "0":
+        mining.send_all_old_tweets()
     logging.info("Starting mining")
     mining.start_mining()
     logging.info("Starting Flask Application.")
