@@ -7,6 +7,11 @@ import logging
 import os
 import time
 
+from itertools import permutations
+import nltk
+import re
+from nltk.corpus import stopwords
+
 from tweepy import API
 from tweepy import OAuthHandler
 from tweepy import Stream
@@ -44,14 +49,50 @@ streaming_regions = [{
 class Topic:
     def __init__(self, topic_name, tags=None):
         self.topic_name = topic_name
-        self.tags = tags
+        self.tags = word_filter(tags)
         if tags is None:
-            self.tags = [topic_name]
-
+            self.tags = [word_filter(topic_name)]
+            
+    # remove the sensitive char in topic
+    def word_filter(topic):
+        word = list()
+        punctuation = ['+','-','.', ',', '"', "'", '?', '!', ':', ';', '(', ')', '[', ']', '{', '}','@','#']
+        stop_words = set(stopwords.words('english'))
+        stop_words.update(['AND','and','OR','or'])
+        for el in punctuation:
+            topic = topic.replace(el,"")
+        for w in topic.split():
+            if not w.lower() in stop_words:
+                word.append(w)
+        topic = ' '.join(word)
+        return topic
+    
+    def add_dict(word, dict):
+        if (word in dict):
+            num = dict[word]
+            num = num + 1
+            dict[word] = num
+        else:
+            dict[word] = 1
+            
     def tweet_is_about_topic(self, text):
+        query = list()
         for tag in self.tags:
-            if tag in text.lower().split():
+            # reorder the keywords in topic
+            for i in permutations(tag.split(),len(tag.split())):
+                # search tweets containing hashtags and usernames
+                query.append(' '.join(i))
+                query.append('@'+' '.join(i))
+                query.append('#'+' '.join(i))    
+        for j in range(0,len(query)):
+            pattern = "("+ ')(.*?)('.join(query[j].split())+")"
+            if re.search(pattern, text):
+                #for word in text.split():
+                    #word = word_filter(word)
+                    #add_dict(word,tmp_query)
                 return True
+            #if query in text.lower().split():
+                #return True
         return False
 
 
