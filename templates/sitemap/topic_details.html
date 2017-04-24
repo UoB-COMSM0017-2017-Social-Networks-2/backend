@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Topic: {{ topic_id }}</title>
+</head>
+<body>
+<div>
+    <a href="{{ url_for('show_sitemap') }}">Back to sitemap</a>
+</div>
+<h1>Topic: {{ topic_id }}</h1>
+<ul>
+    <li>
+        <a href="{{ url_for('get_topic_evolution', topic_id=topic_id) }}">Topic evolution (CSV)</a>
+    </li>
+    <li>
+        Evolution per location:
+        <ul>
+            {% for location in all_locations %}
+                <li>
+                    <a href="{{ url_for('get_topic_location_evolution', topic_id=topic_id, location_id=location.region_id) }}">
+                        Topic evolution in {{ location.name }} (CSV)
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </li>
+    <li>
+        Distribution per interval:
+        <ul>
+            {% for interval in all_intervals %}
+                <li>
+                    <a href="{{ url_for('get_topic_interval_data', interval=interval, topic_id=topic_id) }}">
+                        Topic data in interval: {{ interval }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sitemap: all topics</title>
+</head>
+<body>
+<table>
+    <tr>
+        <th>Topic</th>
+        <th>Evolution (CSV)</th>
+        <th>Topic details (HTML)</th>
+    </tr>
+    {% for topic in all_topics %}
+        <tr>
+            <td>{{ topic }}</td>
+            <td>
+                <a href="{{ url_for('get_topic_evolution', topic_id=topic) }}">Evolution</a>
+            </td>
+            <td>
+                <a href="{{ url_for('show_sitemap_topic_details', topic_id=topic) }}">Topic details</a>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+</body>
+</html>

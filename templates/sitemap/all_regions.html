@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sitemap: all regions</title>
+</head>
+<body>
+<table>
+    <tr>
+        <th>Region</th>
+        <th>ID</th>
+    </tr>
+    {% for region in all_regions %}
+        <tr>
+            <td>
+                {{ region.name }}
+            </td>
+            <td>
+                {{ region.region_id }}
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+</body>
+</html>

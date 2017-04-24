@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sitemap: all intervals</title>
+</head>
+<body>
+<table>
+    <tr>
+        <th>Interval</th>
+        <th>Topics (JSON)</th>
+        <th>Topics data (CSV)</th>
+    </tr>
+    {% for interval in all_intervals %}
+        <tr>
+            <td>{{ interval[0] }} - {{ interval[1] }}</td>
+            <td>
+                <a href="{{ url_for('get_interval_topics', interval=interval[2]) }}">Topics (JSON)</a>
+            </td>
+            <td>
+                <a href="{{ url_for('get_interval_topics_details', interval=interval[2]) }}">Topic details (CSV)</a>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+</body>
+</html>

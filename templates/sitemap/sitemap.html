@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sitemap</title>
+</head>
+<body>
+<ul>
+    <li>
+        <a href="{{ url_for('stats') }}">Stats (JSON)</a>
+    </li>
+    <li>
+        <a href="{{ url_for('get_current_topics') }}">Current topics (JSON)</a>
+    </li>
+    <li>
+        <a href="{{ url_for('get_intervals') }}">Intervals (JSON)</a>
+    </li>
+    <li>
+        <a href="{{ url_for('show_sitemap_all_topics') }}">Overview of all topics (HTML)</a>
+    </li>
+    <li>
+        <a href="{{ url_for('show_sitemap_all_intervals') }}">Overview of all intervals (HTML)</a>
+    </li>
+    <li>
+        <a href="{{ url_for('show_sitemap_all_regions') }}">Overview of all regions (HTML)</a>
+    </li>
+</ul>
+</body>
+</html>

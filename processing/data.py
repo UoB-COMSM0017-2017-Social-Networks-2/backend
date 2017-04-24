@@ -53,6 +53,14 @@ def get_tweets_in_interval_for_topic(interval, topic):
     return get_tweets(query)
 
 
+def get_all_topics():
+    logging.info("Getting all topics")
+    res = db.tweets.distinct('topic', {})
+    logging.info("Result size: {}".format(len(res)))
+    res = [x for x in res if x is not None]
+    return res
+
+
 def get_current_topics():
     interval = get_last_interval()
     return get_interval_topics(interval)
@@ -64,6 +72,10 @@ def get_earliest_time():
     # TODO: use MongoDB min query
     # all_tweets = get_tweets({})
     # return min(tweet.get_datetime() for tweet in all_tweets)
+
+
+def get_interval_string(interval):
+    return "{}-{}".format(int(interval[0].timestamp()), int(interval[1].timestamp()))
 
 
 def get_intervals():
