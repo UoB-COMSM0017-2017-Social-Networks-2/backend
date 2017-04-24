@@ -1,7 +1,7 @@
 from flask import render_template
 
 from main import app
-from processing.data import get_tweets
+from processing.data import count_tweets
 from views.authentication import *
 from views.data import *
 
@@ -18,7 +18,6 @@ def application():
 
 @app.route('/stats')
 def stats():
-    all_tweets = get_tweets({})
     return jsonify({
-        "nb_tweets": len(all_tweets)
+        "nb_tweets": count_tweets({})
     })
