@@ -85,7 +85,7 @@ def get_topic_location_evolution(topic_id, location_id):
     neg_lines = []
     neut_lines = []
     for interval in topic_evolution:
-        timestamp = interval[0] + (interval[1] - interval[1]) / 2
+        timestamp = interval[0] + (interval[1] - interval[0]) / 2
         summary = topic_evolution[interval]
         pos_lines.append(["POS", summary.get_relative_positive(), timestamp])
         neut_lines.append(["NEUT", summary.get_relative_neutral(), timestamp])
