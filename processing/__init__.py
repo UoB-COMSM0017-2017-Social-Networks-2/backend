@@ -4,7 +4,7 @@ import datetime
 from processing import regions
 from processing import sentiment
 
-SHORT_PERIOD = datetime.timedelta(days=0)
+SHORT_PERIOD = datetime.timedelta(days=-1)
 SHORT_INTERVAL_LENGTH = datetime.timedelta(hours=1)
 LONG_INTERVAL_LENGTH = datetime.timedelta(days=1)
 
