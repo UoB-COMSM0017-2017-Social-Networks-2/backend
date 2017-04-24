@@ -73,8 +73,20 @@ def get_short_intervals():
     return intervals
 
 
+def get_earliest_time():
+    tweet = Tweet.load_stripped_tweet(db.tweets.find_one(sort=[("timestamp", 1)]))
+    return tweet.get_datetime()
+
+
+def get_intervals():
+    start_date = get_earliest_time()
+    long_intervals = get_long_intervals_between(start_date, get_short_term_start())
+    short_intervals = get_short_intervals()
+    return long_intervals + short_intervals
+
+
 def get_last_interval():
-    return get_short_intervals()[-1]
+    return data.get_intervals()[-1]
 
 
 class Tweet:

@@ -5,8 +5,7 @@ Better version loads file content to memory and updates on changes.
 
 import logging
 
-from processing import db, get_last_interval, get_short_intervals, get_long_intervals_between, get_short_term_start, \
-    Tweet
+from processing import db, get_last_interval, Tweet, get_intervals
 from processing import regions
 
 
@@ -66,23 +65,8 @@ def get_current_topics():
     return get_interval_topics(interval)
 
 
-def get_earliest_time():
-    tweet = Tweet.load_stripped_tweet(db.tweets.find_one(sort=[("timestamp", 1)]))
-    return tweet.get_datetime()
-    # TODO: use MongoDB min query
-    # all_tweets = get_tweets({})
-    # return min(tweet.get_datetime() for tweet in all_tweets)
-
-
 def get_interval_string(interval):
     return "{}-{}".format(int(interval[0].timestamp()), int(interval[1].timestamp()))
-
-
-def get_intervals():
-    start_date = get_earliest_time()
-    long_intervals = get_long_intervals_between(start_date, get_short_term_start())
-    short_intervals = get_short_intervals()
-    return long_intervals + short_intervals
 
 
 def get_interval_topics(interval):
@@ -91,7 +75,7 @@ def get_interval_topics(interval):
 
 class TweetsSummary:
     def __init__(self, popularity=0, nb_positive=0, nb_negative=0, nb_neutral=0, average_sentiment=0):
-        assert (popularity == nb_positive + nb_negative + nb_neutral)
+        # assert (popularity == nb_positive + nb_negative + nb_neutral)
         self.popularity = popularity
         self.nb_positive = nb_positive
         self.nb_negative = nb_negative
