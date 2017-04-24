@@ -78,55 +78,40 @@ class StdOutListener(StreamListener):
             return True
 
         # If tweet content contains any of the trending topic.
-        # logging.debug("Topics: {}".format([x.topic_name for x in StdOutListener.topics]))
         for topic in StdOutListener.topics:
             if topic.tweet_is_about_topic(tweet):
-                print("Received relevant tweet ({}): {}".format(topic.topic_name, tweet))
+                logging.info("Received relevant tweet ({}): {}".format(topic.topic_name, tweet))
                 data['TrendingTopic'] = topic.topic_name
                 with open(MINING_TWEET_JSON_FILE, 'a') as tf:
                     tf.write(json.dumps(data) + '\n')
         return True
 
     def on_error(self, status):
-        print("Received streaming error: {}".format(status))
+        logging.error("Received streaming error: {}".format(status))
 
 
 def send_tweets(tweets_file=MINING_TWEET_JSON_FILE, move_old=False):
     logging.info("SENDING TWEETS!")
-    #tweets = []
-
     try:
         with open(tweets_file, 'r') as f:
             for line in f.readlines():
                 if len(line.strip()) == 0:
                     continue
                 try:
-                    # tweets.append(json.loads(line.strip()))
                     tweet = json.loads(line.strip())
                     process_new_tweets([tweet])
                 except Exception as ex:
                     logging.error(ex)
                     logging.error("error for tweet: {}".format(line))
-                    # process_new_tweets(tweets)
-        # This runs the system command of transfering file to s3 bucket
-        # proc = subprocess.Popen(["aws", "s3", "cp", tweets_file, "s3://sentiment-bristol"],
-        #                        stdout=subprocess.PIPE, shell=True)
-        # (out, err) = proc.communicate()
-        # print("program output:", out)
-        # Remove file
         if move_old:
             os.rename(tweets_file, "{}_{}".format(tweets_file, time.time()))
-            # proc = subprocess.Popen(["rm", MINING_TWEET_JSON_FILE], stdout=subprocess.PIPE, shell=True)
-            # (out, err) = proc.communicate()
-            # print("Removed JSON: {}".format(out))
     except Exception as ex:
         logging.warning("Processing tweets failed, continuing!")
         logging.warning(ex)
 
 
-
 def stream_tweets_for_region(name, bounding_box, consumer_keys, user_keys):
-    print("Streaming tweets for {}".format(name))
+    logging.info("Streaming tweets for {}".format(name))
     consumer_key = consumer_keys['CONSUMER_KEY']
     consumer_secret = consumer_keys['CONSUMER_SECRET']
     access_token = user_keys['ACCESS_TOKEN']
@@ -162,7 +147,7 @@ def start_mining():
 
 def start_region_threads(consumer_keys, mining_keys):
     min_length = min(len(streaming_regions), len(mining_keys))
-    print("Found {} regions and key tuples".format(min_length))
+    logging.debug("Found {} regions and key tuples".format(min_length))
     for region, user_keys in zip(streaming_regions[:min_length], mining_keys[:min_length]):
         _thread.start_new_thread(stream_tweets_for_region, (region['name'], region['bounding_box'], consumer_keys, {
             "ACCESS_TOKEN": user_keys[0],

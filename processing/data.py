@@ -3,6 +3,8 @@ Initial version loads data from files.
 Better version loads file content to memory and updates on changes.
 """
 
+import logging
+
 from processing import db, get_last_interval, get_short_intervals, get_long_intervals_between, get_short_term_start, \
     Tweet
 from processing import regions
@@ -34,6 +36,8 @@ def get_tweets_in_interval_region_topic(interval, location_id, topic):
 
 
 def get_tweets(query):
+    logging.info("Getting tweets for query: {}".format(query))
+    logging.info("Nb results: {}".format(count_tweets(query)))
     tweets = db.tweets.find(query)
     return [Tweet.load_stripped_tweet(tweet) for tweet in tweets]
 
