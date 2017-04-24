@@ -91,11 +91,21 @@ def get_interval_topics(interval):
 
 class TweetsSummary:
     def __init__(self, popularity=0, nb_positive=0, nb_negative=0, nb_neutral=0, average_sentiment=0):
+        assert (popularity == nb_positive + nb_negative + nb_neutral)
         self.popularity = popularity
         self.nb_positive = nb_positive
         self.nb_negative = nb_negative
         self.nb_neutral = nb_neutral
         self.average_sentiment = average_sentiment
+
+    def get_relative_positive(self):
+        return float(self.nb_positive) / self.popularity if self.popularity > 0 else 0
+
+    def get_relative_neutral(self):
+        return float(self.nb_neutral) / self.popularity if self.popularity > 0 else 0
+
+    def get_relative_negative(self):
+        return float(self.nb_negative) / self.popularity if self.popularity > 0 else 0
 
     def get_overall_sentiment(self):
         if self.nb_positive > max(self.nb_neutral, self.nb_negative):
