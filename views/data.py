@@ -90,9 +90,9 @@ def get_topic_location_evolution(topic_id, location_id):
         pos_lines.append(["POS", summary.get_relative_positive(), timestamp])
         neut_lines.append(["NEUT", summary.get_relative_neutral(), timestamp])
         neg_lines.append(["NEG", summary.get_relative_negative(), timestamp])
-        #pos_lines.append(["POS", summary.nb_positive, timestamp])
-        #neut_lines.append(["NEUT", summary.nb_neutral, timestamp])
-        #neg_lines.append(["NEG", summary.nb_negative, timestamp])
+        # pos_lines.append(["POS", summary.nb_positive, timestamp])
+        # neut_lines.append(["NEUT", summary.nb_neutral, timestamp])
+        # neg_lines.append(["NEG", summary.nb_negative, timestamp])
     data_array = pos_lines + neut_lines + neg_lines
     return output_csv_file("evolution.csv", data_array)
 

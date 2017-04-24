@@ -1,10 +1,9 @@
-from flask import render_template
-
 from main import app
 from processing.data import count_tweets
 from views.authentication import *
 from views.data import *
 from views.sitemap import *
+
 
 @app.route('/')
 def index():
@@ -21,4 +20,3 @@ def stats():
     return jsonify({
         "nb_tweets": count_tweets({})
     })
-
