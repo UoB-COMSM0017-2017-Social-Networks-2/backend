@@ -120,16 +120,19 @@ class TweetsSummary:
             "positive_ratio": self.get_positive_ratio()
         }
 
-    def add_contribution(self, summary, nb_descendants):
-        if summary.popularity == 0:
-            return
-        self.nb_positive += summary.nb_positive / nb_descendants
-        self.nb_neutral += summary.nb_neutral / nb_descendants
-        self.nb_negative += summary.nb_negative / nb_descendants
-        self.average_sentiment = (self.average_sentiment * self.popularity
-                                  + summary.average_sentiment * summary.popularity) / \
-                                 (summary.popularity + self.popularity)
-        self.popularity += summary.popularity / nb_descendants
+    def add_contributions(self, parent_summaries):
+        total_sentiment = self.average_sentiment
+        total_weight = 1
+        for summary_descendants in parent_summaries:
+            summary = summary_descendants[0]
+            nb_descendants = summary_descendants[1]
+            total_weight += summary.popularity / nb_descendants
+            self.nb_positive += summary.nb_positive / nb_descendants
+            self.nb_neutral += summary.nb_neutral / nb_descendants
+            self.nb_negative += summary.nb_negative / nb_descendants
+            self.popularity += summary.popularity / nb_descendants
+            total_sentiment += summary.average_sentiment / nb_descendants * summary.popularity
+        self.average_sentiment = total_sentiment / total_weight
 
 
 def get_tweets_summary(tweets):
@@ -192,11 +195,10 @@ def get_topic_interval_data_per_region(topic_id, interval):
     for region in leaf_regions:
         tweets = [t for t in all_tweets if t.region_id == region.region_id]
         total_summary = get_tweets_summary(tweets)
-
-        for ancestor_region in region.get_ancestors():
-            total_summary.add_contribution(parent_data[ancestor_region.region_id],
-                                           ancestor_region.get_number_of_leaf_descendants())
-
+        parent_contributions = [
+            (parent_data[ancestor_region.region_id], ancestor_region.get_number_of_leaf_descendants()) for
+            ancestor_region in region.get_ancestors()]
+        total_summary.add_contributions(parent_contributions)
         region_data[region.region_id] = total_summary
     return region_data
 
