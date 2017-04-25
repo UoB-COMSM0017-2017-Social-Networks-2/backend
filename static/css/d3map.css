@@ -1,0 +1,20 @@
+/* D3 Visualisation */
+.background {
+  fill: #038;
+  pointer-events: all;
+}
+
+.feature {
+  cursor: pointer;
+}
+
+.feature.active {
+  fill-opacity: 0.9;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.feature:hover {
+  stroke: #fff;
+}

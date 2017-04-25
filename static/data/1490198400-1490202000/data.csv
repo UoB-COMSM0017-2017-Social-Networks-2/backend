@@ -1,0 +1,20 @@
+TOPIC,TOPIC,Popularity,Overall sentiment,Positive ratio,Average sentiment
+British Politics,British Politics,295,0,0.8,0.08792677966101696
+#wednesdaywisdom,#wednesdaywisdom,3,0,0,0.15293333333333334
+#LondonAttack,#LondonAttack,1,0,0,0.0
+Death Note,Death Note,2,0,0.0,-0.5129
+Kay Burley,Kay Burley,3,0,0,-0.06583333333333335
+#worldwaterday,#worldwaterday,18,0,1.0,0.4037166666666667
+House of Commons,House of Commons,4,0,0,-0.13935000000000003
+Sports,Sports,5,0,0,0.10752000000000002
+#BrookSpence,#BrookSpence,4,0,0,0.1814
+Television,Television,5,0,0,0.12431999999999999
+Ronnie Moran,Ronnie Moran,5,0,0,0.019559999999999977
+Brussels,Brussels,35,0,0,-0.35276571428571424
+Parliament,Parliament,90,0,0.3333333333333333,-0.24155333333333331
+Trump,Trump,33,0,0.0,-0.05807575757575758
+Westminster,Westminster,1274,0,0.22772277227722773,-0.20139183673469363
+Russia,Russia,1,0,0,-0.0772
+NHS,NHS,2,0,0,0.47409999999999997
+Technology,Technology,18,0,1.0,0.29684444444444447
+#PrayForLondon,#PrayForLondon,294,0,0.37037037037037035,-0.08518945578231292
