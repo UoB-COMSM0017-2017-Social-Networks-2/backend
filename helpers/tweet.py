@@ -56,13 +56,14 @@ class Tweet:
         return self.sentiment["compound"]
 
     def negative_sentiment(self):
-        return self.sentiment['neg'] > max(self.sentiment['neu'], self.sentiment['pos'])
+        return self.sentiment['neg'] > self.sentiment['pos']
 
     def neutral_sentiment(self):
-        return self.sentiment['neu'] > max(self.sentiment['pos'], self.sentiment['neg'])
+        return self.sentiment['pos'] == self.sentiment['neg']
 
     def positive_sentiment(self):
-        return self.sentiment['pos'] > max(self.sentiment['neg'], self.sentiment['neu'])
+        # return self.sentiment['pos'] > max(self.sentiment['neg'], self.sentiment['neu'])
+        return self.sentiment['pos'] > self.sentiment['neg']
 
     @classmethod
     def load_raw_tweet(cls, tweet_obj):

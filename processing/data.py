@@ -169,6 +169,7 @@ def get_topic_interval_data_per_region(topic_id, interval):
     region_data = dict()
     for region in regions.get_all_regions():
         tweets = get_tweets_in_interval_region_topic(interval, topic=topic_id, location_id=region.region_id)
+        # TODO: add contribution of global tweets
         region_data[region.region_id] = get_tweets_summary(tweets)
     return region_data
 
