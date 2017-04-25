@@ -155,10 +155,13 @@ def get_tweets_summary(tweets):
 
 
 def get_interval_topics_details(interval):
+    # logging.info("get_interval_topics_details!")
     topics = get_interval_topics(interval)
+    all_tweets = get_tweets_in_interval(interval)
     topic_data = dict()
     for topic in topics:
-        tweets = get_tweets_in_interval_for_topic(interval, topic)
+        # tweets = get_tweets_in_interval_for_topic(interval, topic)
+        tweets = [tweet for tweet in all_tweets if tweet.topic == topic]
         topic_data[topic] = get_tweets_summary(tweets)
     return topic_data
 
