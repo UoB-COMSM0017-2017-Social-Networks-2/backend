@@ -5,6 +5,7 @@ Better version loads file content to memory and updates on changes.
 
 import datetime
 import logging
+import time
 
 from processing import db, get_last_interval, Tweet, get_intervals
 from processing import regions
@@ -38,7 +39,10 @@ def get_tweets_in_interval_region_topic(interval, location_id, topic):
 def get_tweets(query):
     logging.info("Getting tweets for query: {}".format(query))
     logging.info("Nb results: {}".format(count_tweets(query)))
+    start_time = time.time()
     tweets = db.tweets.find(query)
+    end_time = time.time()
+    logging.info("Took {} seconds".format(end_time - start_time))
     return [Tweet.load_stripped_tweet(tweet) for tweet in tweets]
 
 
@@ -189,10 +193,12 @@ def get_topic_interval_data_per_region(topic_id, interval):
 
     all_tweets = get_tweets_in_interval_for_topic(interval, topic_id)
 
+    non_leaf_start = time.time()
     parent_data = dict()
     for region in non_leaf_regions:
         tweets = [t for t in all_tweets if t.region_id == region.region_id]
         parent_data[region.region_id] = get_tweets_summary(tweets)
+    non_leaf_end = time.time()
 
     region_data = dict()
     for region in leaf_regions:
@@ -203,6 +209,10 @@ def get_topic_interval_data_per_region(topic_id, interval):
             ancestor_region in region.get_ancestors()]
         total_summary.add_contributions(parent_contributions)
         region_data[region.region_id] = total_summary
+
+    leaf_end = time.time()
+    logging.info("Non-leaf regions: {} seconds".format(non_leaf_end - non_leaf_start))
+    logging.info("Leaf regions: {} seconds".format(leaf_end - non_leaf_end))
     return region_data
 
 
