@@ -13,8 +13,9 @@ from tweepy import Stream
 from tweepy.streaming import StreamListener
 
 import mining.authentication
+from helpers.topics import Topic, get_static_topics
 from main import app
-from processing.update import process_new_tweets
+from processing import scripts
 
 MINING_TWEET_JSON_FILE = 'output/tweetlocation.json'
 STORING_INTERVAL = app.config['STORING_INTERVAL'] if 'STORING_INTERVAL' in app.config else 60 * 10  # 10 minutes
@@ -39,21 +40,6 @@ streaming_regions = [{
     "name": "Southern Ireland",
     "bounding_box": [-10.83, 51.22, -5.57, 53.27]
 }]
-
-
-class Topic:
-    def __init__(self, topic_name, tags=None):
-        self.topic_name = topic_name
-        self.tags = tags
-        if tags is None:
-            self.tags = [topic_name]
-
-    def tweet_is_about_topic(self, text):
-        for tag in self.tags:
-            if tag in text.lower().split():
-                return True
-        return False
-
 
 TrendingTopics = []
 StaticTopics = []
@@ -90,6 +76,9 @@ class StdOutListener(StreamListener):
         logging.error("Received streaming error: {}".format(status))
 
 
+import processing.update
+
+
 def send_tweets(tweets_file=MINING_TWEET_JSON_FILE, move_old=False):
     logging.info("SENDING TWEETS!")
     try:
@@ -99,7 +88,7 @@ def send_tweets(tweets_file=MINING_TWEET_JSON_FILE, move_old=False):
                     continue
                 try:
                     tweet = json.loads(line.strip())
-                    process_new_tweets([tweet])
+                    processing.update.process_new_tweets([tweet])
                 except Exception as ex:
                     logging.error(ex)
                     logging.error("error for tweet: {}".format(line))
@@ -135,6 +124,13 @@ def send_all_old_tweets_thread():
         send_tweets(tweet_filename, move_old=False)
     logging.info("Done storing old tweets")
     logging.info("MongoDB population DONE")
+    logging.info("Starting to run cleanup functions")
+    logging.info("Remove irrelevant tweets:")
+    scripts.remove_irrelevant_tweets()
+    logging.info("Done")
+    logging.info("Update sentiment and region classification")
+    scripts.update_sentiment_and_region_classification()
+    logging.info("Done")
 
 
 def send_all_old_tweets():
@@ -154,12 +150,6 @@ def start_region_threads(consumer_keys, mining_keys):
             "ACCESS_SECRET": user_keys[1]
         }))
         time.sleep(10)
-
-
-def get_static_topics():
-    with open('data/ads_topics.json', 'r') as staticTopicData:
-        d = json.load(staticTopicData)
-    return [Topic(x['name'], x['queries']) for x in d]
 
 
 def get_trending_topics(consumer_key, consumer_secret, access_token, access_secret):
