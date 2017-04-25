@@ -4,7 +4,7 @@ Older tweets that are passed to process_new_tweets are discarded.
 Newer tweets are taken into account.
 """
 
-from processing import Tweet
+from helpers.tweet import Tweet
 from processing import db
 
 

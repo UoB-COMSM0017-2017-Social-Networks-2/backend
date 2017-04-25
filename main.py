@@ -3,8 +3,6 @@ import os
 
 from flask import Flask
 
-import mining
-
 app = Flask("SN2", template_folder='templates')
 app.config.from_pyfile('config.cfg')
 logging.basicConfig(filename='output/app.log', level=app.config['LOGGING_LEVEL'])
@@ -29,6 +27,8 @@ def get_twitter_token():
 
 
 from views import *
+from processing.scripts import *
+import mining
 
 
 def main():
