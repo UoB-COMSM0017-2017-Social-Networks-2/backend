@@ -20,7 +20,7 @@ def get_topic_filter(topic):
 
 
 def get_children_locations_filter(location_id):
-    all_region_ids = list(regions.get_all_sub_region_ids(location_id))
+    all_region_ids = regions.get_region_by_id(location_id).get_all_sub_region_ids()
     return {"region_id": {"$in": all_region_ids}}
 
 

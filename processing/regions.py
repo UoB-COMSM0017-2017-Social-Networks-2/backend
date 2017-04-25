@@ -13,6 +13,9 @@ class Region:
         self.region_id = region_id
         self.parent_id = parent_id
         self.shape = None
+        self.nb_leaf_descendants = None
+        self.leaf = None
+        self.sub_region_ids = None
 
     def set_shape(self, region_shape):
         self.shape = region_shape
@@ -32,7 +35,18 @@ class Region:
         return None
 
     def get_number_of_leaf_descendants(self):
-        return len([region for region in get_all_sub_region_ids(self.region_id) if get_region_by_id(region).is_leaf()])
+        if self.nb_leaf_descendants is None:
+            self.nb_leaf_descendants = len(
+                list(filter(lambda r: r.is_leaf(), map(get_region_by_id, self.get_all_sub_region_ids()))))
+        return self.nb_leaf_descendants
+
+    def get_all_sub_region_ids(self):
+        if self.sub_region_ids is None:
+            self.sub_region_ids = set()
+            for region in get_all_regions():
+                if is_in_region(region, get_region_by_id(self.region_id)):
+                    self.sub_region_ids.add(region.region_id)
+        return set(self.sub_region_ids)
 
     def get_ancestors(self):
         res = []
@@ -43,7 +57,9 @@ class Region:
         return res
 
     def is_leaf(self):
-        return not any(region.parent_id == self.region_id for region in get_all_regions())
+        if self.leaf is None:
+            self.leaf = not any(region.parent_id == self.region_id for region in get_all_regions())
+        return self.leaf
 
 
 all_regions_dict = dict()
@@ -116,11 +132,3 @@ def get_smallest_region_by_coordinates(longitude, latitude):
         if region.has_shape() and region.contains_point(point):
             return region
     return None
-
-
-def get_all_sub_region_ids(parent_region_id):
-    regions = set()
-    for region in get_all_regions():
-        if is_in_region(region, get_region_by_id(parent_region_id)):
-            regions.add(region.region_id)
-    return regions
