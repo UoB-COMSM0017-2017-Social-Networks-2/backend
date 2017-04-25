@@ -1,5 +1,6 @@
 import calendar
 import datetime
+import logging
 
 from helpers.tweet import Tweet
 from processing import regions
@@ -9,7 +10,7 @@ SHORT_PERIOD = datetime.timedelta(days=-1)
 SHORT_INTERVAL_LENGTH = datetime.timedelta(hours=1)
 LONG_INTERVAL_LENGTH = datetime.timedelta(days=1)
 
-from pymongo import MongoClient, ASCENDING
+from pymongo import MongoClient, ASCENDING, errors
 
 from main import app
 
@@ -17,7 +18,10 @@ mongo = MongoClient(app.config['MONGO_HOST'], app.config['MONGO_PORT'])
 db = mongo.database
 
 db.tweets.create_index("tweet_id")
-db.tweets.create_index([("tweet_id", ASCENDING), ("topic", ASCENDING)], unique=True)
+try:
+    db.tweets.create_index([("tweet_id", ASCENDING), ("topic", ASCENDING)], unique=True)
+except errors.DuplicateKeyError as err:
+    logging.error("Failed to create a unique index: {}".format(err))
 
 
 def get_short_term_start():
