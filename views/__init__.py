@@ -3,6 +3,7 @@ from processing.data import count_tweets
 from views.authentication import *
 from views.data import *
 from views.sitemap import *
+from views.tweets import *
 
 
 @app.route('/')

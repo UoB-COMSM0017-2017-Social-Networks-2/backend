@@ -20,6 +20,10 @@
             <td>
                 <a href="{{ url_for('get_interval_topics_details', interval=interval[2]) }}">Topic details (CSV)</a>
             </td>
+            <td>
+                <a href="{{ url_for('download_tweets_for_interval', interval=interval[2]) }}">Download all tweets
+                    (JSON)</a>
+            </td>
         </tr>
     {% endfor %}
 </table>

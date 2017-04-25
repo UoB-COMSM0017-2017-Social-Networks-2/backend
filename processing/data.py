@@ -3,6 +3,7 @@ Initial version loads data from files.
 Better version loads file content to memory and updates on changes.
 """
 
+import datetime
 import logging
 
 from processing import db, get_last_interval, Tweet, get_intervals
@@ -67,6 +68,11 @@ def get_current_topics():
 
 def get_interval_string(interval):
     return "{}-{}".format(int(interval[0].timestamp()), int(interval[1].timestamp()))
+
+
+def parse_interval_string(interval_string):
+    part1, part2 = interval_string.split("-")
+    return datetime.datetime.utcfromtimestamp(int(part1)), datetime.datetime.utcfromtimestamp(int(part2))
 
 
 def get_interval_topics(interval):

@@ -1,20 +1,10 @@
 import csv
-import datetime
 import io
 
 from flask import make_response, jsonify
 
 from main import app
 from processing import data, regions
-
-
-def parse_interval_string(interval_string):
-    part1, part2 = interval_string.split("-")
-    return datetime.datetime.utcfromtimestamp(int(part1)), datetime.datetime.utcfromtimestamp(int(part2))
-
-
-def interval_to_string(interval):
-    return "{}-{}".format(int(interval[0].timestamp()), int(interval[1].timestamp()))
 
 
 def output_csv_file(filename, data):
@@ -46,7 +36,7 @@ def get_intervals():
     """
     intervals = data.get_intervals()
     return jsonify({
-        "intervals": sorted([interval_to_string(interval) for interval in intervals])
+        "intervals": sorted([data.get_interval_string(interval) for interval in intervals])
     })
 
 
@@ -56,7 +46,7 @@ def get_interval_topics(interval):
     :param interval:
     :return: List of topics that were monitored during interval as JSON response.
     """
-    topics = data.get_interval_topics(parse_interval_string(interval))
+    topics = data.get_interval_topics(data.parse_interval_string(interval))
     return jsonify({
         "topics": topics
     })
@@ -104,7 +94,7 @@ def get_interval_topics_details(interval):
     :param interval:
     :return: Popularity and overall sentiment of all topics in interval as a CSV response.
     """
-    topics_details = data.get_interval_topics_details(parse_interval_string(interval))
+    topics_details = data.get_interval_topics_details(data.parse_interval_string(interval))
     data_array = [("TOPIC", "TOPIC", "Popularity", "Overall_sentiment", "Positive_ratio", "Average_sentiment")] + \
                  [(topic, topic, summary.popularity, summary.get_overall_sentiment(),
                    summary.get_positive_ratio(), summary.average_sentiment)
@@ -119,7 +109,7 @@ def get_topic_interval_data(topic_id, interval):
     :param interval:
     :return: Local sentiment and popularity of topic in interval for each region as a CSV response.
     """
-    topic_interval_data = data.get_topic_interval_data_per_region(topic_id, parse_interval_string(interval))
+    topic_interval_data = data.get_topic_interval_data_per_region(topic_id, data.parse_interval_string(interval))
     data_array = [["Region_ID", "Popularity", "Average_sentiment", "Overall_sentiment"]]
     for region, summary in topic_interval_data.items():
         data_array.append([
@@ -136,7 +126,7 @@ def get_topic_interval_location_data(topic_id, interval, location_id):
     :param location_id:
     :return: Local sentiment and popularity of topic in interval for specific region as CSV response.
     """
-    summary = data.get_topic_interval_location_data(topic_id, parse_interval_string(interval),
+    summary = data.get_topic_interval_location_data(topic_id, data.parse_interval_string(interval),
                                                     location_id)
     return jsonify({
         "data": summary.get_dict()
