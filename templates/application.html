@@ -98,24 +98,11 @@
 </div> <!--! end of #row -->
   
   <script>
-    var minval = 0;
-    var initFinished;
+  // Change the slider to the correct intervals, listed in intervals.json
     d3.json("intervals.json", function(d){
-      for (j = 0; j < d.intervals.length - 5; j++){
-        (function(j){
-          d3.csv("topics/interval/"+d.intervals[j]+"/data.csv", function(data){
-            if (data[0] == undefined){
-              minval = j;
-            }
-            console.log(minval);
-            console.log(d.intervals.length)
-              d3.select("#time_input")
-              .attr("min", d.intervals[minval+1].split("-").shift() / 3600)
-              .attr("max", d.intervals[d.intervals.length - 2].split("-").shift() / 3600)
-              console.log("mival:",minval);
-          });
-        })(j);
-      }
+      d3.select("#time_input")
+      .attr("min", d.intervals[0].split("-").shift() / 3600)
+      .attr("max", d.intervals[d.intervals.length - 1].split("-").shift() / 3600)
     });
   </script>
 
