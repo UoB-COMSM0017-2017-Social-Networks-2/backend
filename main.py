@@ -38,7 +38,7 @@ def main():
     logging.info("Starting mining")
     mining.start_mining()
     logging.info("Starting Flask Application.")
-    app.run(host=app.config['HOSTNAME'], port=int(app.config['PORT']))
+    app.run(host=app.config['HOSTNAME'], port=int(app.config['PORT']), threaded=True)
     logging.info("Flask application stopped running.")
 
 
