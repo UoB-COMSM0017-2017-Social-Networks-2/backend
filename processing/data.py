@@ -120,6 +120,17 @@ class TweetsSummary:
             "positive_ratio": self.get_positive_ratio()
         }
 
+    def add_contribution(self, summary, nb_descendants):
+        if summary.popularity == 0:
+            return
+        self.nb_positive += summary.nb_positive / nb_descendants
+        self.nb_neutral += summary.nb_neutral / nb_descendants
+        self.nb_negative += summary.nb_negative / nb_descendants
+        self.average_sentiment = (self.average_sentiment * self.popularity
+                                  + summary.average_sentiment * summary.popularity) / \
+                                 (summary.popularity + self.popularity)
+        self.popularity += summary.popularity / nb_descendants
+
 
 def get_tweets_summary(tweets):
     popularity = len(tweets)
@@ -166,11 +177,27 @@ def get_topic_location_evolution(topic_id, location_id):
 
 
 def get_topic_interval_data_per_region(topic_id, interval):
+    all_regions = regions.get_all_regions()
+    leaf_regions = [region for region in all_regions if region.is_leaf()]
+    non_leaf_regions = [region for region in all_regions if not region.is_leaf()]
+
+    all_tweets = get_tweets_in_interval_for_topic(interval, topic_id)
+
+    parent_data = dict()
+    for region in non_leaf_regions:
+        tweets = [t for t in all_tweets if t.region_id == region.region_id]
+        parent_data[region.region_id] = get_tweets_summary(tweets)
+
     region_data = dict()
-    for region in regions.get_all_regions():
-        tweets = get_tweets_in_interval_region_topic(interval, topic=topic_id, location_id=region.region_id)
-        # TODO: add contribution of global tweets
-        region_data[region.region_id] = get_tweets_summary(tweets)
+    for region in leaf_regions:
+        tweets = [t for t in all_tweets if t.region_id == region.region_id]
+        total_summary = get_tweets_summary(tweets)
+
+        for ancestor_region in region.get_ancestors():
+            total_summary.add_contribution(parent_data[ancestor_region.region_id],
+                                           ancestor_region.get_number_of_leaf_descendants())
+
+        region_data[region.region_id] = total_summary
     return region_data
 
 

@@ -26,10 +26,24 @@ class Region:
         return self.shape.contains(point)
 
     def get_parent(self):
-        for region in all_regions_dict.values():
+        for region in get_all_regions():
             if region.region_id == self.parent_id:
                 return region
         return None
+
+    def get_number_of_leaf_descendants(self):
+        return len([region for region in get_all_sub_region_ids(self.region_id) if get_region_by_id(region).is_leaf()])
+
+    def get_ancestors(self):
+        res = []
+        current = self.get_parent()
+        while current is not None:
+            res.append(current)
+            current = current.get_parent()
+        return res
+
+    def is_leaf(self):
+        return not any(region.parent_id == self.region_id for region in get_all_regions())
 
 
 all_regions_dict = dict()
