@@ -43,7 +43,7 @@
     
   // Create a function which returns a colour based on sentiment values
   var color = d3.scale.threshold()
-    .domain([-0.66, -0.33, 0.33, 0.66, 1])
+    .domain([-0.2, -0.0001, 0.0001, 0.2, 1])
     .range(["#FF0033", "#FF6000", "#FFFF00", "#B0FF00", "#80FF00", "#00FF00"]);
     
   // Queue allows handling of multiple files within the same function ("ready" - below)
