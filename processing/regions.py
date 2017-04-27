@@ -128,7 +128,9 @@ def get_global_region():
 # Function that returns region name based on input data
 def get_smallest_region_by_coordinates(longitude, latitude):
     point = Point(longitude, latitude)
+    containing_region = None
     for region in get_all_regions():
         if region.has_shape() and region.contains_point(point):
-            return region
-    return None
+            if is_in_region(region, containing_region):
+                containing_region = region
+    return containing_region
