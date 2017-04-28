@@ -3,7 +3,6 @@ import datetime
 import logging
 
 from helpers.tweet import Tweet
-from processing import regions
 from processing import sentiment
 
 SHORT_PERIOD = datetime.timedelta(days=-1)

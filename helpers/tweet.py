@@ -1,7 +1,8 @@
 import datetime
 
+from helpers import regions
 from helpers.topics import transform_topic_name
-from processing import regions, sentiment
+from processing import sentiment
 
 MINING_TOPIC_KEY = "TrendingTopic"
 MINING_TEXT_KEY = "text"
@@ -20,7 +21,7 @@ def get_attribute_if_exists(d, key, default=None):
 def get_tweet_region_id(tweet_obj):
     coordinates = tweet_obj['coordinates']
     if coordinates is None:
-        return regions.get_global_region().region_id
+        return regions.get_matching_region_for_place(tweet_obj["place"]).region_id
     else:
         coordinates = coordinates["coordinates"]
         region = regions.get_smallest_region_by_coordinates(coordinates[0], coordinates[1])

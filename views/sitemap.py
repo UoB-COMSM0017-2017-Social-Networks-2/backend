@@ -2,8 +2,9 @@ import logging
 
 from flask import render_template
 
+from helpers import regions
 from main import app
-from processing import data, regions
+from processing import data
 
 
 @app.route('/sitemap')
