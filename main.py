@@ -26,9 +26,10 @@ def get_twitter_token():
     return session.get('twitter_token')
 
 
+import mining
+
 from views import *
 from processing.scripts import *
-import mining
 
 
 def main():

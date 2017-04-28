@@ -2,6 +2,7 @@ import logging
 
 from flask import render_template
 
+import processing.intervals
 from helpers import regions
 from main import app
 from processing import data
@@ -20,7 +21,7 @@ def show_sitemap_all_topics():
 
 
 def get_all_intervals_as_strings():
-    return [data.get_interval_string(interval) for interval in data.get_intervals()]
+    return [data.get_interval_string(interval) for interval in processing.intervals.get_intervals()]
 
 
 @app.route('/sitemap/topic/<string:topic_id>/details')
@@ -36,7 +37,7 @@ def show_sitemap_topic_details(topic_id):
 def show_sitemap_all_intervals():
     all_intervals = [
         (interval[0].isoformat(), interval[1].isoformat(), data.get_interval_string(interval))
-        for interval in data.get_intervals()
+        for interval in processing.intervals.get_intervals()
     ]
     return render_template('sitemap/all_intervals.html', all_intervals=all_intervals)
 

@@ -7,6 +7,8 @@ services:
       - "13000:5000"
     volumes:
       - .:/code
+    environment:
+      - SEND_OLD_TWEETS=0
   database:
     image: mongo:3.4
     command: --smallfiles --rest

@@ -8,7 +8,9 @@ import logging
 import time
 
 from helpers import regions
-from processing import db, get_last_interval, Tweet, get_intervals
+from helpers.tweet import Tweet
+from processing.database import db
+from processing.intervals import get_intervals, get_last_interval
 
 
 def get_interval_filter(interval):

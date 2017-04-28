@@ -5,7 +5,7 @@ Newer tweets are taken into account.
 """
 
 from helpers.tweet import Tweet
-from processing import db
+from processing.database import db
 
 
 def get_tweet_by_twitter_id(tweet_id):

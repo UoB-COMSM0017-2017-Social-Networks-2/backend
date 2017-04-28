@@ -4,7 +4,8 @@ import click
 
 from helpers.topics import get_static_topics, transform_topic_name
 from main import app
-from processing import db, Tweet
+from helpers.tweet import Tweet
+from processing.database import db
 
 
 @app.cli.command()

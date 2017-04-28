@@ -3,6 +3,7 @@ import io
 
 from flask import make_response, jsonify
 
+import processing.intervals
 from helpers import regions
 from main import app
 from processing import data
@@ -35,7 +36,7 @@ def get_intervals():
     """
     :return: List of available intervals
     """
-    intervals = data.get_intervals()
+    intervals = processing.intervals.get_intervals()
     return jsonify({
         "intervals": sorted([data.get_interval_string(interval) for interval in intervals])
     })

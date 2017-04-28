@@ -1,8 +1,7 @@
 import datetime
 
-from helpers import regions
+from helpers import regions, sentiment
 from helpers.topics import transform_topic_name
-from processing import sentiment
 
 MINING_TOPIC_KEY = "TrendingTopic"
 MINING_TEXT_KEY = "text"

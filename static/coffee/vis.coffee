@@ -355,8 +355,10 @@ Bubbles = () ->
   updateActive = (id) ->
     node.classed("bubble-selected", (d) -> id == idValue(d))
     # if no node is selected, id will be empty
+    console.log(id)
     if id.length > 0
-      d3.select("#status").html("<h3>The topic selected is: <span class=\"active\">#{id}</span></h3>")
+      topic_str = id.substring(0, id.indexOf('='))
+      d3.select("#status").html("<h3>The topic selected is: <span class=\"active\">#{topic_str}</span></h3>")
     else
       d3.select("#status").html("<h3>Select a topic!</h3>")
 
@@ -452,10 +454,11 @@ $ ->
       d3.selectAll("#bubble-labels").remove()
       plot.time(parseFloat(this.output.value))
       val1 = parseFloat(this.output.value)
-      val2 = val1 + 3600
+      val2 = val1 + 3600*24
       key = val1 + '-' + val2
       console.log("new interval:", key)
-      $("#time_output").html(parseFloat(this.output.value))
+      d = new Date(this.output.value * 1000)
+      $('#time_output').val(d.toDateString());
       d3.csv("topics/interval/#{key}/data.csv", display)
 
       current_topic=decodeURIComponent(location.hash).split("==").shift().substring(1)

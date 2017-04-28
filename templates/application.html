@@ -2,79 +2,84 @@
 <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
 <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
 <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-  <title>UK Twitter Visualisation</title>
-  <!-- Load Bootstrap -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <!-- Load D3 -->
-  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-  <script src="http://d3js.org/queue.v1.min.js"></script>
-  <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <title>UK Twitter Visualisation</title>
+    <!-- Load Bootstrap -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- Load D3 -->
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
 
-  <link rel = "stylesheet" href = "static/css/bootstrapmap.css" />
-  <link rel = "stylesheet" href = "static/css/d3map.css" />
-  <link rel = "stylesheet" href = "static/css/sitecss.css" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="stylesheet" href="static/css/bootstrapmap.css"/>
+    <link rel="stylesheet" href="static/css/d3map.css"/>
+    <link rel="stylesheet" href="static/css/sitecss.css"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-  <!-- ------- -->
-  <!-- BUBBLES -->
-  <meta name="description" content="">
-  <meta name="author" content="">
+    <!-- ------- -->
+    <!-- BUBBLES -->
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <!-- CSS concatenated and minified via ant build script-->
-  <link rel="stylesheet" href="static/css/reset.css">
-  <link rel="stylesheet" href="static/css/bootstrap.min.css">
-  <link rel="stylesheet" href="static/css/style.css">
-  <!-- end CSS-->
+    <!-- CSS concatenated and minified via ant build script-->
+    <link rel="stylesheet" href="static/css/reset.css">
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/css/style.css">
+    <style type="text/css">
+        #status{
+            color:white;
+        }
+    </style>
+    <!-- end CSS-->
 
-  <script src="static/js/libs/modernizr-2.0.6.min.js"></script>
-  <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script> 
+    <script src="static/js/libs/modernizr-2.0.6.min.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 </head>
 
 <body style="background-color: #038;">
 <!-- Navigation bar -->
 <nav class="navbar navbar-inverse navbar-fixed-top">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>                        
-      </button>
-      <a class="navbar-brand" href="#">UK Twitter Map</a>
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">UK Twitter Map</a>
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="active"><a href="#">Applied</a></li>
+                <li><a href="#">Data</a></li>
+                <li><a href="#">Science</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="{{ url_for('.login') }}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+            </ul>
+        </div>
     </div>
-    <div class="collapse navbar-collapse" id="myNavbar">
-      <ul class="nav navbar-nav navbar-right">
-        <li class="active"><a href="#">Applied</a></li>
-        <li><a href="#">Data</a></li>
-        <li><a href="#">Science</a></li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="{{ url_for('.login') }}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
-      </ul>
-    </div>
-  </div>
 </nav>
 
 
-
-  <div class="row">
-    <div class="col-xs-5" style="padding-left: 0px; padding-right:0px;">  
-      <div id="bubblecol"></div>
-      <div id="status"></div>
+<div class="row">
+    <div class="col-xs-5" style="padding-left: 0px; padding-right:0px;">
+        <div id="bubblecol"></div>
+        <div id="status"></div>
     </div>
     <div class="col-xs-7" id="map" style="padding-left: 0px; padding-right:0px"><p><br><br></p></div>
-  </div>
+</div>
 
 
 <!---------------->
@@ -82,46 +87,55 @@
 <!---------------->
 
 <div class="row">
-  <div class="col-xs-2"></div>
-  <div class="col-xs-8">
-    <div id="main" role="main">
-      <div id="controls">
-        <h3>Date</h3>
-        <form id="time" oninput="output.value = time_input.value * 3600" >
-          <input id="time_input" type="range" min="0" max="0" style="width:650px;">
-          <output id="time_output" name="output" for="input">22</output> March 2017
-        </form>          
-      </div>
+    <div class="col-xs-2"></div>
+    <div class="col-xs-8">
+        <div id="main" role="main">
+            <div id="controls">
+                <h3>Date</h3>
+                <form id="time" oninput="output.value = time_input.value">
+                    <input id="time_input" type="range" min="{{ start }}" max="{{ end }}" step="{{ step }}"
+                           style="width:650px;">
+                    <output id="time_output" name="output" for="input"></output>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="col-xs-2"></div>
+    <div class="col-xs-2"></div>
 </div> <!--! end of #row -->
-  
-  <script>
-  // Change the slider to the correct intervals, listed in intervals.json
-    d3.json("intervals.json", function(d){
-      d3.select("#time_input")
-      .attr("min", d.intervals[0].split("-").shift() / 3600)
-      .attr("max", d.intervals[d.intervals.length - 1].split("-").shift() / 3600)
+
+<script>
+    // Change the slider to the correct intervals, listed in intervals.json
+    $(function () {
+
+        $('#time_input').change(function () {
+            var value = $(this).val();
+            console.log(value);
+
+        });
     });
-  </script>
+    {# d3.json("intervals.json", function (d) {
+        d3.select("#time_input")
+            .attr("min", d.intervals[0].split("-").shift())
+            .attr("max", d.intervals[d.intervals.length - 1].split("-").shift())
+    });#}
+</script>
 
 
 <!------------------------------>
 <!-- LOAD BUBBLE CHART SCRIPT -->
 <!------------------------------>
 
- <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script> -->
-  <script>window.jQuery || document.write('<script src="static/js/libs/jquery-1.7.2.min.js"><\/script>')</script>
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script> -->
+<script>window.jQuery || document.write('<script src="static/js/libs/jquery-1.7.2.min.js"><\/script>')</script>
 
 
-  <script defer src="static/js/plugins.js"></script>
-  <script src="static/js/libs/coffee-script.js"></script>
-  <script type="text/coffeescript" src="static/coffee/vis.coffee"></script>
-  <script type="text/javascript">
-  </script>
+<script defer src="static/js/plugins.js"></script>
+<script src="static/js/libs/coffee-script.js"></script>
+<script type="text/coffeescript" src="static/coffee/vis.coffee?{{ timestamp }}"></script>
+<script type="text/javascript">
+</script>
 
-  <!--[if lt IE 7 ]>
+<!--[if lt IE 7 ]>
     <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
     <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
   <![endif]-->
@@ -131,7 +145,7 @@
 <!-- MAP VISUALISATION SCRIPT -->
 <!------------------------------>
 
-<script src="static/js/map.js"></script>
+<script src="static/js/map.js?{{ timestamp }}"></script>
 
 </body>
 </html>
